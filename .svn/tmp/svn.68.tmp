@@ -1,0 +1,349 @@
+package controller;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import app.MyApp;
+import model.Atributi;
+import model.PaketModel;
+import model.Tabela;
+import model.TableModel;
+
+public class Row {
+	 
+	public String[] uzmiHeadere(Tabela t) {
+		
+		Connection conn;
+		try {
+			conn = DriverManager.getConnection("jdbc:jtds:sqlserver://147.91.175.155/psw-2018-tim2-4","psw-2018-tim2-4","tim2-413090834");
+		
+			t.toString();
+
+		String izmena=t.getTitle();
+		
+		if(t.getTitle().contains(" ")) {
+			String str = " ";
+			izmena=izmena.replace(str, "_");
+			
+			
+		}
+		
+		if(izmena.equals("Country")) 
+			izmena="Drzava";	
+		System.out.println("Izmena "+izmena);
+		if(izmena.equals("Place")) izmena="Naseljeno_mesto";
+		
+		String sql2="select COLUMN_NAME from INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='"+izmena+"'";
+		PreparedStatement pstmt2 = conn.prepareStatement(sql2);
+		
+		ResultSet rset2 = pstmt2.executeQuery();
+		
+		int brojac3=0;
+		while(rset2.next()) {
+			brojac3++;
+		}
+		rset2 = pstmt2.executeQuery();
+		
+		String[] columns=new String[brojac3];
+		int br=0;
+		while(rset2.next()) { //NAZIVI KOLONA
+			for(int i=0;i<1;i++) {
+				//System.out.println(rset2.getString(i+1));
+				for(Atributi s: t.getAttributes()) {
+					if(s.getCode().equals(rset2.getString(i+1))) {
+					
+						if(s.getName().equals("Oznaka"))
+						{
+							s.setName(MyApp.getInstance().getResourceBundle().getString("oznaka"));
+						}else if(s.getName().equals("Glavni grad"))
+						{
+							s.setName(MyApp.getInstance().getResourceBundle().getString("glavniGrad"));
+						}else if(s.getName().equals("Naziv"))
+						{
+							s.setName(MyApp.getInstance().getResourceBundle().getString("naziv"));
+						}else if(s.getName().equals("Drzava"))
+						{
+							s.setName(MyApp.getInstance().getResourceBundle().getString("drzava"));
+						}else if(s.getName().equals("Post. broj"))
+						{
+							s.setName(MyApp.getInstance().getResourceBundle().getString("postBroj"));
+						}else if(s.getName().equals("Grad"))
+						{
+							s.setName(MyApp.getInstance().getResourceBundle().getString("grad"));
+						}
+						else if(s.getName().equals("Broj stanovnika"))
+						{
+							s.setName(MyApp.getInstance().getResourceBundle().getString("brojStanovnika"));
+						}
+						else if(s.getName().equals("Indeks"))
+						{
+							s.setName(MyApp.getInstance().getResourceBundle().getString("indeks"));
+						}
+						else if(s.getName().equals("Ime"))
+						{
+							s.setName(MyApp.getInstance().getResourceBundle().getString("ime"));
+						}
+						else if(s.getName().equals("Prezime"))
+						{
+							s.setName(MyApp.getInstance().getResourceBundle().getString("prezime"));
+						}
+						else if(s.getName().equals("Drzava rodjenja"))
+						{
+							s.setName(MyApp.getInstance().getResourceBundle().getString("drzavaRodjenja"));
+						}else if(s.getName().equals("Mesto rodjenja"))
+						{
+							s.setName(MyApp.getInstance().getResourceBundle().getString("mestoRodjenja"));
+						}else if(s.getName().equals("Drzava stan."))
+						{
+							s.setName(MyApp.getInstance().getResourceBundle().getString("drzavaStanovanja"));
+						}else if(s.getName().equals("Mesto stan."))
+						{
+							s.setName(MyApp.getInstance().getResourceBundle().getString("mestoStanovanja"));
+						}
+						
+						
+						columns[br]=s.getName();
+						
+					}
+				}
+			}
+			br++;
+		}
+		rset2.close();
+		pstmt2.close();
+			return columns;
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+	public Object[][] konekcijaSaBazom(Tabela t) {
+		try {
+				//otvaranje konekcije
+			
+				Connection conn = DriverManager.getConnection("jdbc:jtds:sqlserver://147.91.175.155/psw-2018-tim2-4","psw-2018-tim2-4","tim2-413090834");
+		
+				String izmena=t.getTitle();
+				if(t.getTitle().contains(" ")) {
+					String str = " ";
+					izmena=izmena.replace(str, "_");
+				}
+			
+				if(izmena.equals("Country")) izmena="Drzava";
+				System.out.println("Izmena "+izmena);
+				if(izmena.equals("Place")) izmena="Naseljeno_mesto";
+				
+				String sql2="select COLUMN_NAME from INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='"+izmena+"'";
+				String sql = "select * from "+izmena;
+				PreparedStatement pstmt2 = conn.prepareStatement(sql2);
+				PreparedStatement pstmt = conn.prepareStatement(sql);
+	
+				ResultSet rset = pstmt.executeQuery();
+				ResultSet rset2 = pstmt2.executeQuery();
+				
+				int brojac3=0;
+				while(rset2.next()) {
+					brojac3++;
+				}
+				rset2 = pstmt2.executeQuery();
+				
+				String[] columns=new String[brojac3];
+				while(rset2.next()) { //NAZIVI KOLONA
+					for(int i=0;i<1;i++) {
+						//System.out.println(rset.getString(i+1));
+						columns[i]=rset2.getString(i+1);
+					}
+				}
+					
+				int brojac=0;
+				while(rset.next()) {
+					brojac++;
+				}
+				rset = pstmt.executeQuery();
+				//System.out.println(brojac);
+				//provera da li ima podataka u resultset-u
+				if(!rset.isBeforeFirst()) {
+					System.out.println("Nema podataka");
+				}
+				
+				int brPar=columns.length; //ivan promenio bilo je t.getAtr.sizr
+				Object[][] data=new Object[brojac][brPar];
+	
+				int brojac2=0;
+				while(rset.next()) {
+					for(int i=0;i<brPar;i++) {
+						data[brojac2][i]=rset.getString(i+1);
+					}
+					brojac2++;
+				}
+
+				rset.close();
+				pstmt.close();
+				return data;
+			
+			} catch (Exception e) {
+				e.printStackTrace();
+				return null;
+			}
+		
+	}	//otvaranje konekcije
+	
+	public HashMap<Tabela, Object[][]> konekcijaSaBazomDeca(ArrayList<Tabela> deca){
+		try {
+			Connection conn = DriverManager.getConnection("jdbc:jtds:sqlserver://147.91.175.155/psw-2018-tim2-4","psw-2018-tim2-4","tim2-413090834");
+			HashMap<Tabela, Object[][]> podaci=new HashMap<>();
+		if(deca.size()!=0) {
+		for(Tabela t: deca) {
+			//System.out.println(t.getTitle());
+			String izmena=t.getTitle();
+			if(t.getTitle().contains(" ")) {
+				String str = " ";
+				izmena=izmena.replace(str, "_");
+			}
+			
+			if(izmena.equals("Country")) izmena="Drzava";
+			System.out.println("Izmena "+izmena);
+			if(izmena.equals("Place")) izmena="Naseljeno_mesto";
+			
+			String sql = "select * from "+izmena;
+			//System.out.println(izmena);
+			PreparedStatement pstmt = conn.prepareStatement(sql);
+			
+			ResultSet rset = pstmt.executeQuery();
+			
+			int brojac=0;
+			while(rset.next()) {
+				brojac++;
+			}
+			rset = pstmt.executeQuery();
+			//System.out.println(brojac);
+			//provera da li ima podataka u resultset-u
+			if(!rset.isBeforeFirst()) {
+				System.out.println("Nema podataka");
+			}
+			
+			int brPar=t.getAttributes().size();
+			Object[][] data=new Object[brojac][brPar];
+			
+			int brojac2=0;
+			while(rset.next()) {
+				for(int i=0;i<brPar;i++) {
+					data[brojac2][i]=rset.getString(i+1);
+				}
+				
+				brojac2++;
+			}
+			podaci.put(t, data);
+			rset.close();
+			pstmt.close();
+			
+			
+		
+		
+		}
+		}////PROVERI IMA LI DECE
+		return podaci;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+	public HashMap<Tabela, Object[][]> konekcijaSaBazomDecaProbrano(HashMap<Tabela, HashMap<String,String>> decaStrKljucVr,ArrayList<TableModel> tabeleModeli){
+		//mapa dece sa kljucem naziv tabele deteta i 2. hashmapa je pozicija sa vrednoscu na tom kljucu
+		try {
+			Connection conn = DriverManager.getConnection("jdbc:jtds:sqlserver://147.91.175.155/psw-2018-tim2-4","psw-2018-tim2-4","tim2-413090834");
+			HashMap<Tabela, Object[][]> podaci=new HashMap<>();
+		if(decaStrKljucVr.size()!=0) {
+		for(Tabela t: decaStrKljucVr.keySet()) {
+			//System.out.println(t.getTitle());
+			String izmena=t.getTitle();
+			if(t.getTitle().contains(" ")) {
+				String str = " ";
+				izmena=izmena.replace(str, "_");
+			}
+			
+			if(izmena.equals("Country")) izmena="Drzava";
+			System.out.println("Izmena "+izmena);
+			if(izmena.equals("Place")) izmena="Naseljeno_mesto";
+			
+					HashMap<String,String> kodVr=new HashMap<>();
+					HashMap<String,String> kljVr=decaStrKljucVr.get(t);
+					for(String nazKol : kljVr.keySet()) {
+						ArrayList<TableModel> decaModeli=new ArrayList<>();
+						for(TableModel tm: tabeleModeli) { //jer moze u razlicitim tabelama da budu isti nazivi obelezja
+							if(t.getTitle().equals(tm.getTabela().getTitle())) {
+								decaModeli.add(tm);
+							}
+						}
+						for(TableModel tm:decaModeli) {
+							for(Atributi aa :tm.getTabela().getAttributes()) {
+								if(aa.getName().equals(nazKol)) {
+							//onda uzmi kod jer je u bazi naziv kolone kod
+									kodVr.put(aa.getCode(), kljVr.get(nazKol));
+									//System.out.println("KOD "+aa.getCode()+" VR "+kljVr.get(nazKol));
+								}
+							}
+						}
+					}
+			String nov="";
+			int pozicija=0;
+			String kolone="";
+			for(String kod: kodVr.keySet()) {
+				kolone+=kod+" like '%"+kodVr.get(kod)+"%'"+" and ";
+			}
+			pozicija=kolone.lastIndexOf("and");
+			//System.out.println(pozicija+"na or");
+			nov = kolone.substring(0, pozicija-1);
+			String sql = "select * from "+izmena+" where "+nov; //kod like %naziv%
+			//System.out.println(sql);
+			//System.out.println(izmena);
+			PreparedStatement pstmt = conn.prepareStatement(sql);
+			
+			ResultSet rset = pstmt.executeQuery();
+			
+			int brojac=0;
+			while(rset.next()) {
+				brojac++;
+			}
+			rset = pstmt.executeQuery();
+			//System.out.println(brojac);
+			//provera da li ima podataka u resultset-u
+			if(!rset.isBeforeFirst()) {
+				System.out.println("Nema podataka");
+			}
+			
+			int brPar=t.getAttributes().size();
+			Object[][] data=new Object[brojac][brPar];
+
+			int brojac2=0;
+			while(rset.next()) {
+				for(int i=0;i<brPar;i++) {
+					data[brojac2][i]=rset.getString(i+1);
+				}
+				
+				brojac2++;
+			}
+			podaci.put(t, data);
+			rset.close();
+			pstmt.close();
+			
+			
+		
+		
+		}
+		}////PROVERI IMA LI DECE
+		return podaci;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}	}
+
+		
+}

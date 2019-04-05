@@ -1,0 +1,17 @@
+package model;
+
+import javax.swing.ImageIcon;
+
+public class TableModel extends Tabela{
+	
+	private ImageIcon ikonica;
+
+	public ImageIcon getIkonica() {
+		return ikonica;
+	}
+
+	public void setIkonica(ImageIcon ikonica) {
+		this.ikonica = ikonica;
+	}
+
+}

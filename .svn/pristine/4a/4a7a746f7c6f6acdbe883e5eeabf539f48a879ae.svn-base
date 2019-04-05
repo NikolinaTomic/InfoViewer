@@ -1,0 +1,52 @@
+package controller;
+
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollBar;
+import javax.swing.JScrollPane;
+import javax.swing.JTextField;
+
+import model.Tabela;
+
+public class AddResurs implements ActionListener {
+	Tabela t;
+	public AddResurs(Tabela t) {
+		this.t=t;
+	}
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		// TODO Auto-generated method stub
+		//JScrollBar sb=new JScrollBar(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+		JFrame validationFrame=new JFrame("Add data");
+		JPanel val=new JPanel();
+		val.setLayout(new BoxLayout(val, BoxLayout.Y_AXIS));
+		for(int i=0;i<t.getAttributes().size();i++) {
+			JPanel p=new JPanel();
+			JLabel l=new JLabel();
+			l.setText(t.getAttributes().get(i).getName());
+			JTextField tf=new JTextField();
+			tf.setPreferredSize(new Dimension(150, 30));
+			p.add(l);
+			p.add(tf);
+			val.add(p);
+			
+		}
+		
+		JButton b=new JButton("OK");
+		b.setPreferredSize(new Dimension(110,30));
+		val.add(b);
+		validationFrame.add(val);
+		validationFrame.setSize(300, 350);
+	     validationFrame.setLocationRelativeTo(null);
+	     validationFrame.setVisible(true);
+	}
+
+}

@@ -1,0 +1,52 @@
+package view;
+
+import java.util.Observable;
+import java.util.Observer;
+
+import javax.swing.tree.DefaultMutableTreeNode;
+
+import app.MyApp;
+import controller.InfoClass;
+import model.PaketModel;
+import model.TableModel;
+
+public class CvorStablaP extends DefaultMutableTreeNode implements Observer{
+
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	public  CvorStablaP(Object o) {
+		this.setUserObject(o);
+		// TODO Auto-generated constructor stub
+	}
+	
+	
+	@Override
+	public void update(Observable arg0, Object arg1) {
+		// TODO Auto-generated method stub
+		InfoClass ic = (InfoClass) arg1;
+		PaketModel pm = (PaketModel) ic.getSendModel();
+		if(ic.getInstruction().equals("nodeChanged")) {
+	/*		for(int i=0;i<pm.getDeca().size();i++) {
+				if(pm.getDeca().get(i) instanceof PaketModel) {
+					PaketModel podPaket = (PaketModel) pm.getDeca().get(i);
+					CvorStablaP cvor = new CvorStablaP(podPaket);
+					podPaket.addObserver(cvor);
+					MyApp.getInstance().getModel().insertNodeInto(cvor, this, this.getChildCount());
+				podPaket.promenaUStablu();
+				}
+				else if(pm.getDeca().get(i) instanceof TableModel) {
+					TableModel tm = (TableModel) pm.getDeca().get(i);
+					CvorStablaT cvorT = new CvorStablaT(tm);
+					tm.addObserver(cvorT);
+					MyApp.getInstance().getModel().insertNodeInto(cvorT, this,this.getChildCount());
+	             tm.promenaUStablu();
+				}
+			}*/
+		}
+	}
+
+}

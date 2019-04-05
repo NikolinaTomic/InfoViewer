@@ -1,0 +1,70 @@
+package model;
+
+import java.util.ArrayList;
+
+/**
+ * Klasa <code>Relacija</code> predstavlja podatke
+ * o tabelama (deo klase Tabela) koji su potrebni prilikom mapiranja
+ * JSON šeme na objekat Tabela.
+ * 
+ * @author Luka
+ * @version %I%, %G%
+ */
+public class Relacija {
+	
+	private String relation_code;
+	private boolean strong_relationship;
+	private String relation_title;
+	private ArrayList<String> sourceKey;
+	private ArrayList<String> destinationKey;
+	private String destinationTable;
+	
+	public Relacija() {
+		sourceKey=new ArrayList<>();
+		destinationKey=new ArrayList<>();
+	}
+	public String getRelation_title() {
+		return relation_title;
+	}
+	public void setRelation_title(String relation_title) {
+		this.relation_title = relation_title;
+	}
+	public ArrayList<String> getSourceKey() {
+		return sourceKey;
+	}
+	public void setSourceKey(ArrayList<String> sourceKey) {
+		this.sourceKey = sourceKey;
+	}
+	public ArrayList<String> getDestinationKey() {
+		return destinationKey;
+	}
+	public void setDestinationKey(ArrayList<String> destinationKey) {
+		this.destinationKey = destinationKey;
+	}
+	public String getDestinationTable() {
+		return destinationTable;
+	}
+	public void setDestinationTable(String destinationTable) {
+		this.destinationTable = destinationTable;
+	}
+	@Override
+	public String toString() {
+		return "Relacija [title=" + relation_title + ", sourceKey=" + sourceKey + ", destinationKey=" + destinationKey
+				+ ", destinationTable=" + destinationTable + "]";
+	}
+
+	public String getRelation_code() {
+		return relation_code;
+	}
+	public void setRelation_code(String relation_code) {
+		this.relation_code = relation_code;
+	}
+	public boolean isStrong_relationship() {
+		return strong_relationship;
+	}
+	public void setStrong_relationship(boolean strong_relationship) {
+		this.strong_relationship = strong_relationship;
+	}
+
+
+}

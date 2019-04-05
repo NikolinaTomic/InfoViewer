@@ -1,0 +1,266 @@
+package view;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Enumeration;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JTree;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
+import javax.swing.tree.DefaultMutableTreeNode;
+
+import controller.TreeManipulation;
+import model.Paket;
+import model.Tabela;
+
+public class TreeAndTable extends JFrame{
+	private TreeManipulation tm;
+	private Paket paketM;
+	private static TreeAndTable instance;
+	private JTree tree = new JTree();
+	private DefaultMutableTreeNode sm;
+<<<<<<< .mine
+	private static ArrayList<Paket> p = new ArrayList<>();
+    DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
+||||||| .r41
+=======
+	private JPanel centralPanel;
+>>>>>>> .r42
+	public static TreeAndTable getInstance(){
+		if(instance==null){
+			instance=new TreeAndTable();
+		
+		}return instance;
+	}
+	
+	public void addToCentralPanel(JPanel p) {
+		
+		centralPanel.removeAll();
+		centralPanel.add(p);
+		centralPanel.revalidate();
+		centralPanel.repaint();
+	}
+	
+	public JPanel getCentralPanel() {
+		return centralPanel;
+	}
+	
+	
+
+	
+	public void init(ArrayList<Paket> a,ArrayList<Tabela> t) {
+	
+		JFrame mainFrame = new JFrame("NLI");
+		JPanel levi = new JPanel();
+		JPanel desni = new JPanel();
+		JPanel center = new JPanel(new BorderLayout());	
+		paketM=new Paket();
+		sm = new DefaultMutableTreeNode();
+		//for(int i=1;i<3;i++) {
+		//Stablo s=new Stablo(paketM, a, t);
+		tree = new JTree(popuniStablo(paketM, a, t));
+		tree.setCellRenderer(new TreeCallRenderer(a,t));
+		tree.addMouseListener(new MouseAdapter() {
+	        public void mouseClicked(MouseEvent e) {
+	            if (e.getClickCount() == 2) {
+	                
+					Object selectedNode = tree.getLastSelectedPathComponent();
+					//System.out.println(selectedNode.toString());
+					for(Paket x:a) {
+						if(x.getImePaketa().equals(selectedNode.toString())) {
+							JPanel pa=new JPanel();
+							pa.setBackground(new Color(58, 120, 12));
+							TreeAndTable.getInstance().addToCentralPanel(pa);
+						}
+					}
+					for(Tabela x:t) {
+						if(x.getTitle().equals(selectedNode.toString())) {
+							JPanel pa=new JPanel();
+							pa.setBackground(new Color(200, 200, 200));
+							TreeAndTable.getInstance().addToCentralPanel(pa);
+						}
+					}
+					
+				}}
+	            
+	        
+	    });
+		//}
+		levi.add(tree);
+		this.add(levi,BorderLayout.WEST);
+		
+		centralPanel = new JPanel(new BorderLayout());
+		this.add(getCentralPanel(),BorderLayout.CENTER);
+		//center.add(desni,BorderLayout.EAST);
+		this.setPreferredSize(new Dimension(500,500));
+		this.setSize(500, 500);
+		this.setLocationRelativeTo(null);
+		//mainFrame.add(this);
+		this.setVisible(true);
+	}
+	
+public DefaultMutableTreeNode popuniStablo(Paket w,ArrayList<Paket>a,ArrayList<Tabela> t){
+	
+	DefaultMutableTreeNode koren = new DefaultMutableTreeNode("Root");
+	koren.removeAllChildren();
+	//DefaultMutableTreeNode x= this.getColorModel().getRoot;
+	
+	for(int i = 0 ; i < a.size(); i++){
+		if(a.get(i).getRoditelji().equals("")) {
+		//System.out.println(a.get(i).getImePaketa());
+		DefaultMutableTreeNode roditelj = new DefaultMutableTreeNode(a.get(i).getImePaketa());
+	
+		koren.add(roditelj);
+		}
+		
+	}
+	
+	for(int i = 0 ; i < t.size(); i++){
+		/*System.out.println(t.get(i).getPaket());
+		for(String aa : t.get(i).getParent()) {
+			System.out.println(aa);
+		}*/
+		if((t.get(i).getParent().size()==0) && (t.get(i).getPaket().equals(""))) {
+		DefaultMutableTreeNode roditelj = new DefaultMutableTreeNode(t.get(i).getTitle());
+	
+		koren.add(roditelj);
+		}
+		
+	}
+	
+<<<<<<< .mine
+		
+	/*	int flag=-2;
+	
+||||||| .r41
+=======
+		System.out.println(koren.getChildCount());
+		int flag=-2;
+	
+	//DefaultTreeModel model =(DefaultTreeModel) getTree().getModel();
+>>>>>>> .r42
+		for(int i=0;i<a.size();i++) {
+			if(a.get(i).getRoditelji()!="") {
+				flag++;
+<<<<<<< .mine
+			
+			 Enumeration children = koren.children();
+			 
+				 while(true){	
+||||||| .r41
+=======
+				 Enumeration children = koren.children();
+				 
+				 while(true){
+					 System.out.println("BBBB"+koren.getChildCount());
+				//	 if(children.hasMoreElements()) {
+>>>>>>> .r42
+					 DefaultMutableTreeNode node = (DefaultMutableTreeNode) children.nextElement();
+					// System.out.println(node.toString());
+	                    if(node.toString().equals(a.get(i).getRoditelji())){
+<<<<<<< .mine
+	                        DefaultMutableTreeNode paket = new DefaultMutableTreeNode(a.get(i).getImePaketa()+" [Package]");	                   
+||||||| .r41
+=======
+
+	                        DefaultMutableTreeNode paket = new DefaultMutableTreeNode(a.get(i).getImePaketa());
+	                     
+
+>>>>>>> .r42
+	                        node.add(paket);
+	                     
+	                       model.nodesWereInserted(node, new int[]{node.getChildCount()-1,node.getChildCount()-2});
+	                        model.reload();
+	                       flag=-1;
+	                      
+	                       break;
+	                        
+	                    }
+<<<<<<< .mine
+					 
+	                    else if(!children.hasMoreElements()) {
+	                    	 model.reload();
+	                    	 model.reload(koren);
+	                    	
+	                    	System.out.println(koren.getChildCount());
+	                    	koren =(DefaultMutableTreeNode) koren.getChildAt(++flag);
+	                    	koren.	                    }
+||||||| .r41
+=======
+					// }
+	                 else if(!children.hasMoreElements()) {
+	               //  DefaultMutableTreeNode paket = new DefaultMutableTreeNode(a.get(i).getImePaketa()+" [Package]");
+	                  //  koren =(DefaultMutableTreeNode) koren.getChildAt(++flag);
+	                   System.out.println();
+	                  //  children=koren.children();
+	           
+	                  //  System.out.println("AAAAAAAAAAAAA "+flag+" " +koren.toString()+" "+koren.getChildCount());
+	                	 break;
+	                 }
+>>>>>>> .r42
+	                    
+	                }
+			}
+		}
+<<<<<<< .mine
+		
+	*/
+	Enumeration deca = koren.children();
+	ArrayList<DefaultMutableTreeNode>kids = Collections.list(deca);
+	int counter=0;
+	DefaultMutableTreeNode node;
+	System.out.println(kids.size());
+	for(int i=0;i<a.size();i++) {
+		if(a.get(i).getRoditelji()!="") {
+			for(int j =0;j<kids.size();j++) {
+			 node = kids.get(j);
+			if(node.toString().equals(a.get(i).getRoditelji()+" [Package]")) {	
+				DefaultMutableTreeNode paket = new DefaultMutableTreeNode(a.get(i).getImePaketa()+" [Package]");
+				node.add(paket);
+			System.out.println(node.toString());
+			System.out.println(node.getChildCount());
+		
+		     }
+			else {
+				counter++;
+				if(counter==kids.size()+1) {
+					counter=0;
+					i=0;
+					
+				}
+			}
+			}
+			
+		}
+	}
+||||||| .r41
+=======
+		
+	
+>>>>>>> .r42
+	
+		return koren;
+	}
+
+
+
+	public JTree getTree() {
+		return tree;
+	}
+
+
+
+	public void setTree(JTree tree) {
+		this.tree = tree;
+	}
+	
+
+}

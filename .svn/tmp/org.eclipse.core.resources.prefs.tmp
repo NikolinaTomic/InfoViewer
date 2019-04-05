@@ -1,0 +1,12 @@
+eclipse.preferences.version=1
+<<<<<<< .mine
+encoding//src/controller/AddData.java=UTF-8
+||||||| .r121
+=======
+encoding//src/app/ChangeLanguage.java=UTF-8
+encoding//src/app/MyToolBar.java=UTF-8
+encoding//src/controller/JSON_Parser.java=UTF-8
+>>>>>>> .r122
+encoding//src/controller/Row.java=UTF-8
+encoding//src/view/TableView.java=UTF-8
+encoding//src/view/TreeCallRenderer.java=UTF-8

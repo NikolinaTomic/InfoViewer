@@ -1,0 +1,20 @@
+package app;
+
+import javax.swing.UIManager;
+public class Main {
+
+
+	public static void main(String[] args) {
+		
+		try {
+			UIManager.setLookAndFeel("com.jtattoo.plaf.noire.NoireLookAndFeel");
+			MyApp IV = MyApp.getInstance();
+			IV.setVisible(true);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		} 
+
+	}
+
+}

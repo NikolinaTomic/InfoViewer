@@ -1,0 +1,11 @@
+package controller;
+
+import model.Paket;
+import model.Tabela;
+
+public interface Parser {
+	
+	public Tabela[] parseTable(String sema);
+	public Paket[] parsePaketi(String sema);
+
+}

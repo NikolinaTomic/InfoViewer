@@ -1,0 +1,56 @@
+package model;
+
+import java.util.ArrayList;
+
+public class ParentChildPaket {
+	
+	private String imePaketa;
+	private String roditelji;
+	private ArrayList<ParentChildPaket> deca;
+	
+	public ParentChildPaket(String ime) {
+		this.imePaketa=ime;
+		this.roditelji="";
+	}
+		
+	public ParentChildPaket(String imePaketa, String roditelji) {
+		super();
+		this.imePaketa = imePaketa;
+		this.roditelji = roditelji;
+	}
+	
+	public ParentChildPaket(Paket p, ArrayList<ParentChildPaket> deca) {
+		super();
+		this.imePaketa = p.getImePaketa();
+		this.roditelji = p.getRoditelji();
+		this.deca=deca;
+	}
+	
+	
+
+	public ArrayList<ParentChildPaket> getDeca() {
+		return deca;
+	}
+
+	public void setDeca(ArrayList<ParentChildPaket> deca) {
+		this.deca = deca;
+	}
+
+	public String getImePaketa() {
+		return imePaketa;
+	}
+	public void setImePaketa(String imePaketa) {
+		this.imePaketa = imePaketa;
+	}
+	
+	public String getRoditelji() {
+		return roditelji;
+	}
+	public void setRoditelji(String roditelji) {
+		this.roditelji = roditelji;
+	}
+	@Override
+	public String toString() {
+		return "Paket [imePaketa=" + imePaketa + ", roditelji=" + roditelji + "]";
+	}
+}

@@ -1,0 +1,45 @@
+package model;
+
+import java.util.ArrayList;
+
+public class Paket {
+<<<<<<< .mine
+	private String ime;
+	
+	public Paket(String ime) {
+		this.setIme(ime);
+	}
+
+	public String getIme() {
+		return ime;
+	}
+
+	public void setIme(String ime) {
+		this.ime = ime;
+	}
+||||||| .r26
+=======
+	
+	private String imePaketa;
+	private ArrayList<String> roditelji;
+	public String getImePaketa() {
+		return imePaketa;
+	}
+	public void setImePaketa(String imePaketa) {
+		this.imePaketa = imePaketa;
+	}
+	public ArrayList<String> getRoditelji() {
+		return roditelji;
+	}
+	public void setRoditelji(ArrayList<String> roditelji) {
+		this.roditelji = roditelji;
+	}
+	@Override
+	public String toString() {
+		return "Paket [imePaketa=" + imePaketa + ", roditelji=" + roditelji + "]";
+	}
+	
+	
+>>>>>>> .r28
+
+}

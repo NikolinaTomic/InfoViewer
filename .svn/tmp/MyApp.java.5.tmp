@@ -1,0 +1,685 @@
+package app;
+
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.ResourceBundle;
+
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JTextArea;
+import javax.swing.JTree;
+import javax.swing.WindowConstants;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONTokener;
+
+import controller.JSON_Validator;
+import model.PaketModel;
+import model.TableModel;
+import tree.DrawTree;
+import tree.TreeSelectionListener;
+import view.TreeCallRenderer;
+
+
+/**
+ * <b>Singleton</b> klasa koja se bavi iscrtavanjem glavnog frejma i stabla.
+ * Nasledjuje <b>JFrame</b> zbog rada sa <b>Swing</b> komponentama.
+ * Ova klasa ima drugacije ponasanje u odnosu na <b>private boolean source</b>atribut (razlicito posanje u zavisnosti da li je JSON ili DB).
+ * 
+ * @author Ivan
+ * @version %I%, %G%
+ * @see  HashMap
+ * @see ResourceBundle
+ * 
+ * 
+ * */
+
+public class MyApp extends JFrame {
+	/**
+	 * Parametar koji sluzi da se u njemu cuvaju vrednosti stranih kljuceva u klasi  {@link view.AddView2}
+	 * */
+	
+	private HashMap <String,String> zapamcenoAdd = new HashMap<>();	
+	/**
+	 * Parametar koji sluzi kao instanca singletona
+	 * */
+	private static MyApp instance;
+	private boolean source = false;
+	private MyToolBar toolbar;
+	private JPanel centar=new JPanel();
+    private	JButton sacuvaj;
+    private	JButton exit;
+    private JButton val;
+    private String ip;
+    private String username;
+    private String pass;
+    private JButton par;
+    private ArrayList<PaketModel> PaketModeli=new ArrayList<>();
+    private ArrayList<TableModel> TabelaModeli=new ArrayList<>();
+    private JTextArea arej=new JTextArea();  
+	private ResourceBundle resourceBundle;  
+	private JPanel pa1 = new JPanel();
+	private JPanel pa2 = new JPanel();
+	/**
+	 * Instanciranje klase preko <b>Singleton</b> metode.
+	 *@return Konkretna instanca <b>Singletona</b> 
+	 *
+	 * */
+	public static MyApp getInstance() {
+    	if (instance == null) {
+			instance = new MyApp();
+			instance.initialise();
+		}
+		return instance;
+	}
+	/**
+	 * Dodavanje polja za pisanje desnoj strani aplikacije na klik dugmeta za kreiranje nove seme.
+	 * @param jta TextArea za desnu stranu
+	 * @return text tog TextArea
+	 * */
+	
+	public String addToCentralPanel(JTextArea jta) {
+		
+		centar.removeAll();
+		setArej(jta);
+		centar.add(getArej());
+		centar.revalidate();
+		centar.repaint();
+		return jta.getText();
+	}
+	
+	public JPanel addToCentralPanel2(JPanel p) {
+		
+		centar.removeAll();
+		centar.add(p);
+		centar.revalidate();
+		centar.repaint();
+		return p;
+	}
+	
+	private JTree tree;
+	private DefaultTreeModel model;
+	private PaketModel glavniPaket = new PaketModel();
+    private DefaultMutableTreeNode  root  = new DefaultMutableTreeNode(glavniPaket);
+    private JPanel westPanel = new JPanel();
+    
+   public void initTree() {
+	
+	  glavniPaket.getPaket().setImePaketa(MyApp.getInstance().getResourceBundle().getString("root"));  
+	  for(PaketModel pm: getPaketModeli()) {
+		  if(pm.getPaket().getRoditelji()==null || pm.getPaket().getRoditelji().equals("")) { //ako ima paket u kome je paket ubaci u njegovog roditelja njega kao dete
+			  glavniPaket.getDeca().add(pm);
+		  }
+	  }
+	  
+		for(PaketModel pm: getPaketModeli()) {
+			if(pm.getPaket().getRoditelji()!=null && !pm.getPaket().getRoditelji().equals("")) { //ako ima paket u kome je paket ubaci u njegovog roditelja njega kao dete
+				for(PaketModel pm2: getPaketModeli()) {
+					if(pm2.getPaket().getImePaketa().equals(pm.getPaket().getRoditelji())) {
+						pm2.getDeca().add(pm);
+						break;
+					}
+				}
+			}
+		}
+		for(TableModel tm:getTabelaModeli()) {
+			if(tm.getTabela().getPaket()!=null && !tm.getTabela().getPaket().equals("") && (tm.getTabela().getParent()==null || tm.getTabela().getParent().size()==0)) {//ako ima paket u kome je tabela ubaci u njegovog roditelja njega kao dete
+				for(PaketModel pm2: getPaketModeli()) {
+					if(pm2.getPaket().getImePaketa().equals(tm.getTabela().getPaket())) {
+						pm2.getDeca().add(tm);
+						break;
+					}
+				}
+			}
+		}
+		
+		for(TableModel tm:getTabelaModeli()) {
+			if(tm.getTabela().getPaket()!=null && !tm.getTabela().getPaket().equals("") && tm.getTabela().getParent().size()!=0) {//ako ima paket u kome je tabela ubaci u njegovog roditelja njega kao dete
+				for(String rod: tm.getTabela().getParent()) {
+				for(TableModel pm2: getTabelaModeli()) {
+					if(rod.equals(pm2.getTabela().getTitle())) {
+						pm2.getDeca().add(tm);
+						System.out.println(rod);
+					}
+				}
+				}
+			}
+		}
+		//JSON
+		
+		for(TableModel tm:getTabelaModeli()) {
+			if(tm.getTabela().getPaket()==null || tm.getTabela().getPaket().equals("") && tm.getTabela().getParent().size()!=0) {//ako ima paket u kome je tabela ubaci u njegovog roditelja njega kao dete
+				for(String rod: tm.getTabela().getParent()) {
+				for(TableModel pm2: getTabelaModeli()) {
+					if(rod.equals(pm2.getTabela().getTitle())) {
+						pm2.getDeca().add(tm);
+					}
+				}
+				}
+			}
+		}
+		
+	  for(TableModel tm:getTabelaModeli()) {
+		  if(( tm.getTabela().getPaket()==null || tm.getTabela().getPaket().equals("") )&& tm.getTabela().getParent().size()==0) {
+			  getGlavniPaket().getDeca().add(tm);
+		  }
+	  }
+	   
+	  for(int i=0;i<glavniPaket.getDeca().size();i++) {
+			System.out.println(glavniPaket.getDeca().get(i).toString());
+	  }
+	  
+	  
+	 
+	  
+	   setRoot(root);
+	   model=new DefaultTreeModel(root);
+	   tree=new JTree(model);
+	   tree.setCellRenderer(new TreeCallRenderer());
+	   model.setRoot(root);
+	   DrawTree dt=new DrawTree();
+	   dt.iscrtajStablo(getRoot(), getGlavniPaket());
+       //System.out.println(tree.getRowCount());
+	   tree.expandRow(1);
+	  
+	   tree.addMouseListener(new TreeSelectionListener(this.getWidth()-westPanel.getWidth(),this.getHeight()));
+	   
+   }
+   
+
+ 
+	public JTree getTree() {
+		return tree;
+	}
+
+	public void setTree(JTree tree) {
+		this.tree = tree;
+	}
+
+	public DefaultTreeModel getModel() {
+		return model;
+	}
+
+	public void setModel(DefaultTreeModel model) {
+		this.model = model;
+	}
+
+	public PaketModel getGlavniPaket() {
+		return glavniPaket;
+	}
+
+	public void setGlavniPaket(PaketModel glavniPaket) {
+		this.glavniPaket = glavniPaket;
+	}
+
+	public DefaultMutableTreeNode getRoot() {
+		return root;
+	}
+
+	public void setRoot(DefaultMutableTreeNode root) {
+		this.root = root;
+	}
+	
+	public ResourceBundle getResourceBundle() {
+		return resourceBundle;
+	}
+	
+	public void initialise() {
+	//	root=new DefaultMutableTreeNode(glavniPaket);
+		setResourceBundle(ResourceBundle.getBundle("Languages.MessageResources", Locale.getDefault()));
+		Toolkit toolkit = Toolkit.getDefaultToolkit();
+		Dimension screenSize = toolkit.getScreenSize();
+		int screenHeight = screenSize.height;
+		int screenWidth = screenSize.width;
+		setSize(screenWidth / 2 + 120, screenHeight / 2 );
+		setTitle("InfoViewer");
+		setResizable(true);
+		setIconImage(toolkit.getImage("resources/icon.png"));
+		
+		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+		this.addWindowListener(new java.awt.event.WindowAdapter() {
+		    @Override
+		    public void windowClosing(java.awt.event.WindowEvent e) {
+		      
+		    	if(!MyApp.getInstance().getArej().getText().equals("")) {
+					JDialog dialog = new JDialog();
+					JOptionPane pane = new JOptionPane();
+				dialog.setContentPane(pane);
+				dialog.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+					int a=	pane.showConfirmDialog(dialog, MyApp.getInstance().getResourceBundle().getString("daliCuvati"),MyApp.getInstance().getResourceBundle().getString("warning"),JOptionPane.YES_NO_OPTION);
+					if(JOptionPane.YES_OPTION==a) {
+						JFileChooser fc = new JFileChooser();
+						fc.showSaveDialog(null);
+				try {
+						String putanja = fc.getSelectedFile().getAbsolutePath();
+						String toJason = MyApp.getInstance().getArej().getText();
+						System.out.println(toJason);
+						PrintWriter pw;
+					
+						
+							pw = new PrintWriter(putanja+".json");
+							pw.print(toJason);
+							pw.flush();
+							pw.close();
+						//	MyApp.getInstance().addToCentralPanel(new JTextArea());
+							MyApp.getInstance().getSacuvaj().setVisible(false);
+							MyApp.getInstance().getArej().setEditable(false);
+						} catch (FileNotFoundException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}catch (NullPointerException e2) {
+							// TODO: handle exception
+						}
+					
+				       }
+
+					else if(a==JOptionPane.NO_OPTION) {
+						System.exit(0);
+					}	
+		    	}
+		    }
+		});
+		setLocationRelativeTo(null);
+		
+		
+	    initTree();
+	    westPanel = new JPanel(new BorderLayout());
+		toolbar = new MyToolBar();	
+		JPanel toolbarPanel = new JPanel(new BorderLayout());
+		toolbarPanel.add(toolbar,BorderLayout.WEST);
+		if(source==false) {
+		this.add(toolbarPanel,BorderLayout.NORTH);	
+		System.out.println("stavio");
+		}
+		if(source==true)
+		{
+			System.out.println("aaa");
+			westPanel.removeAll();
+			westPanel.revalidate();
+			westPanel.repaint();
+			pa1.removeAll();
+			pa1.revalidate();
+			pa1.repaint();
+			this.remove(toolbarPanel);
+			this.add(new JPanel(), BorderLayout.NORTH);
+			this.revalidate();
+			this.repaint();
+			
+		}
+		getArej().setEditable(false);	
+		JPanel southPanel = new JPanel();
+		 setSacuvaj(new JButton("Save"));
+		 setExit(new JButton("Back"));
+		 setVal(new JButton("Validate"));
+		 setPar(new JButton("Parse"));
+		
+		pa1.add(tree);
+		westPanel.add(pa1,BorderLayout.NORTH);
+		//westPanel.add(pa2,BorderLayout.SOUTH);
+		
+		 getSacuvaj().setVisible(false);
+		 getExit().setVisible(false);
+		 getVal().setVisible(false);
+		 getPar().setVisible(false);
+		 
+		 getPar().addActionListener(new ActionListener() {
+				
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					// TODO Auto-generated method stub
+					if(!getArej().getText().equals("")) {
+						 try {
+							 
+								opis = new JSONArray(MyApp.getInstance().getArej().getText());
+								
+								valid(opis,true);
+					        } catch (JSONException e2) {
+								// TODO: handle exception
+								JOptionPane.showMessageDialog(null, MyApp.getInstance().getResourceBundle().getString("greskaShema")+e2.getMessage(), MyApp.getInstance().getResourceBundle().getString("error"), 1);					
+							
+							}
+						
+						
+					}else {
+						JOptionPane.showMessageDialog(null, MyApp.getInstance().getResourceBundle().getString("notEmpty"), MyApp.getInstance().getResourceBundle().getString("error"), 1);
+					}
+				}
+			});
+		
+		 
+		 getVal().addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				if(!getArej().getText().equals("")) {
+					 try {
+						 
+							opis = new JSONArray(MyApp.getInstance().getArej().getText());
+							valid(opis,false);
+				        } catch (JSONException e2) {
+							// TODO: handle exception
+							JOptionPane.showMessageDialog(null, MyApp.getInstance().getResourceBundle().getString("greskaShema")+e2.getMessage(), MyApp.getInstance().getResourceBundle().getString("error"), 1);					
+						
+						}
+					
+					
+				}else {
+					JOptionPane.showMessageDialog(null, MyApp.getInstance().getResourceBundle().getString("notEmpty"), MyApp.getInstance().getResourceBundle().getString("error"), 1);
+				}
+			}
+		});
+		 
+		 getExit().addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				// TODO Auto-generated method stub
+				getArej().setText("");
+				MyApp.getInstance().addToCentralPanel(new JTextArea());
+				MyApp.getInstance().getSacuvaj().setVisible(false);
+				MyApp.getInstance().getExit().setVisible(false);
+				MyApp.getInstance().getVal().setVisible(false);
+				MyApp.getInstance().getPar().setVisible(false);
+				MyApp.getInstance().getArej().setEditable(false);
+			}});
+		getSacuvaj().addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				
+			      try {
+			    		String toJason = MyApp.getInstance().getArej().getText();
+			    	  new JSONArray(toJason);
+			    	 
+			    	  JFileChooser fc = new JFileChooser();
+						fc.showSaveDialog(null);
+			    	  String putanja = fc.getSelectedFile().getAbsolutePath();
+			
+				PrintWriter pw;
+			   
+				
+					pw = new PrintWriter(putanja+".json");
+					pw.print(toJason);
+					pw.flush();
+					pw.close();
+					getArej().setText("");
+					MyApp.getInstance().addToCentralPanel(new JTextArea());
+					MyApp.getInstance().getSacuvaj().setVisible(false);
+					MyApp.getInstance().getExit().setVisible(false);
+					MyApp.getInstance().getVal().setVisible(false);
+					MyApp.getInstance().getPar().setVisible(false);
+					MyApp.getInstance().getArej().setEditable(false);
+				} catch (FileNotFoundException e1) {
+					// TODO Auto-generated catch block
+					System.out.println("puklo");
+				}  catch (JSONException e2) {
+					JOptionPane.showMessageDialog(null, MyApp.getInstance().getResourceBundle().getString("greskaShema")+e2.getMessage(),MyApp.getInstance().getResourceBundle().getString("error"), 1);
+					// TODO: handle exception
+				}  catch (NullPointerException e2) {
+					// TODO: handle exception
+				}
+			
+			       
+			       
+			}
+		});
+	    southPanel.add(getVal());
+	    southPanel.add(getPar());
+	    southPanel.add(getSacuvaj());	
+	    southPanel.add(getExit());
+	   // southPanel.add(exit);
+
+		this.add(southPanel,BorderLayout.SOUTH);
+		this.add(westPanel, BorderLayout.WEST);
+		centar = new JPanel(new BorderLayout());
+		this.add(getCentar(),BorderLayout.CENTER);
+		this.getContentPane().add(getCentar(),BorderLayout.CENTER);
+
+
+	}
+	
+	public JPanel getCentar() {
+		return centar;
+	}
+
+	public void setCentar(JPanel centar) {
+		this.centar = centar;
+	}
+
+	public JButton getSacuvaj() {
+		return sacuvaj;
+	}
+
+	public void setSacuvaj(JButton sacuvaj) {
+		this.sacuvaj = sacuvaj;
+	}
+
+	public JButton getExit() {
+		return exit;
+	}
+
+	public void setExit(JButton exit) {
+		this.exit = exit;
+	}
+	
+	public JButton getVal() {
+		return val;
+	}
+
+	public void setVal(JButton val) {
+		this.val = val;
+	}
+
+	public JSONObject shema;
+	public JSONArray opis;
+	public void valid(JSONArray opis,boolean koZove) {
+		JFrame validationFrame = new JFrame();
+		if(koZove==false) {
+		validationFrame.setTitle(MyApp.getInstance().getResourceBundle().getString("validation"));
+		}else {
+			validationFrame.setTitle(MyApp.getInstance().getResourceBundle().getString("parse"));
+		}
+		validationFrame.setResizable(true);
+		JPanel center = new JPanel(new BorderLayout());
+		JPanel south = new JPanel(new BorderLayout());
+		
+		JButton v=new JButton();
+		if(koZove==false) {
+
+			v.setText(MyApp.getInstance().getResourceBundle().getString("validation"));
+			}else {
+				v.setText(MyApp.getInstance().getResourceBundle().getString("parse"));
+			}
+		south.add(v,BorderLayout.CENTER);
+
+		JTextArea taS = new JTextArea();
+	    taS.setText(MyApp.getInstance().getResourceBundle().getString("choseMetaShema"));
+	    taS.setEditable(false);
+	    
+	    JTextArea taS2 = new JTextArea();
+	    taS2.setPreferredSize(new Dimension(200,20));
+	    taS.setPreferredSize(new Dimension(150,20));
+	    taS2.setEditable(false);
+		
+		JButton srS = new JButton(MyApp.getInstance().getResourceBundle().getString("browse"));
+		srS.setPreferredSize(new Dimension(150,20));
+		srS.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				JFileChooser fc = new JFileChooser();
+				fc.setAcceptAllFileFilterUsed(false);
+		        FileNameExtensionFilter filter = new FileNameExtensionFilter("JSON", "json");
+		        fc.addChoosableFileFilter(filter);
+		       if(fc.showOpenDialog(null)==JFileChooser.APPROVE_OPTION){
+		        File f = fc.getSelectedFile();
+		        
+		        try {
+					InputStream inputStream = new BufferedInputStream(new FileInputStream(f));
+					JSONTokener token = new JSONTokener(inputStream);
+					shema = new JSONObject(token);
+	
+					taS2.setText(f.getName());
+		        } catch (FileNotFoundException ea) {
+					// TODO Auto-generated catch block
+					ea.printStackTrace();
+				}catch (JSONException e2) {
+					// TODO: handle exception
+					StringWriter errors = new StringWriter();
+					e2.printStackTrace(new PrintWriter(errors));
+					
+					String greske[] = errors.toString().split("\n");
+					JOptionPane.showMessageDialog(null, MyApp.getInstance().getResourceBundle().getString("greskaShema")+greske[0], MyApp.getInstance().getResourceBundle().getString("error"), 1);
+					
+				
+				}
+		       }
+		       else {
+		    	   
+		       }
+			
+			}
+		});
+		
+		v.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				if(taS2.getText().equals("")) {
+					 JOptionPane.showMessageDialog(null, MyApp.getInstance().getResourceBundle().getString("notEmpty"), MyApp.getInstance().getResourceBundle().getString("error"), 1);
+		                
+					}
+					else {
+						try {
+							
+						JSON_Validator jv=new JSON_Validator();
+						if(koZove==false) {
+						jv.validate(shema, opis,false);
+						}else {
+							jv.validate(shema, opis,true);
+						}
+						}catch (JSONException ea) {
+							// TODO: handle exception
+							StringWriter errors = new StringWriter();
+							ea.printStackTrace(new PrintWriter(errors));
+							
+							
+							String greske[] = errors.toString().split("/#");
+							System.out.println("greske"+greske[0]);
+							JOptionPane.showMessageDialog(null, MyApp.getInstance().getResourceBundle().getString("greskaShema")+greske[0], MyApp.getInstance().getResourceBundle().getString("error"), 1);
+							
+						
+						}
+					
+					}
+
+			}
+		});
+
+		 center.add(taS, BorderLayout.WEST);
+	     center.add(srS,BorderLayout.CENTER);
+	     center.add(taS2,BorderLayout.EAST);
+	     validationFrame.add(center,BorderLayout.CENTER);
+	     validationFrame.add(south,BorderLayout.SOUTH);
+	     validationFrame.setSize(500, 80);
+	     validationFrame.setLocationRelativeTo(null);
+	     validationFrame.setVisible(true);
+	     
+	}
+
+	public ArrayList<PaketModel> getPaketModeli() {
+		return PaketModeli;
+	}
+
+	public void setPaketModeli(ArrayList<PaketModel> paketModeli) {
+		PaketModeli = paketModeli;
+	}
+
+	public ArrayList<TableModel> getTabelaModeli() {
+		return TabelaModeli;
+	}
+
+	public void setTabelaModeli(ArrayList<TableModel> tabelaModeli) {
+		TabelaModeli = tabelaModeli;
+	}
+
+	public JButton getPar() {
+		return par;
+	}
+
+	public void setPar(JButton par) {
+		this.par = par;
+	}
+
+	public JTextArea getArej() {
+		return arej;
+	}
+
+	public void setArej(JTextArea arej) {
+		this.arej = arej;
+	}
+
+	public HashMap <String,String> getZapamcenoAdd() {
+		return zapamcenoAdd;
+	}
+
+	public void setZapamcenoAdd(HashMap <String,String> zapamcenoAdd) {
+		this.zapamcenoAdd = zapamcenoAdd;
+	}
+
+	public void setResourceBundle(ResourceBundle resourceBundle) {
+		this.resourceBundle = resourceBundle;
+	}
+
+	public boolean isSource() {
+		return source;
+	}
+
+	public void setSource(boolean source) {
+		this.source = source;
+	}
+	public String getIp() {
+		return ip;
+	}
+	public void setIp(String ip) {
+		this.ip = ip;
+	}
+	public String getUsername() {
+		return username;
+	}
+	public void setUsername(String username) {
+		this.username = username;
+	}
+	public String getPass() {
+		return pass;
+	}
+	public void setPass(String pass) {
+		this.pass = pass;
+	}
+
+}

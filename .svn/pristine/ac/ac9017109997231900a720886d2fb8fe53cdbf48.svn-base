@@ -1,0 +1,307 @@
+{  
+   "$schema":"http://json-schema.org/draft-07/schema#",
+
+   "title":"Meta-Shema",
+
+   "type":"array",
+     
+     "minItems":1,
+       
+       "items":
+         {
+         "oneOf":[{
+           "type":"object",
+         
+           
+
+       "properties":{
+         
+         "paket":{
+           
+         "type":"string",
+            "minLength":0
+            
+         },
+           
+           "parent":{
+           "type":"array",
+             "minItems":0,
+               "items":{
+               "type":"string",
+                 "minLength":1
+               }
+           
+           },
+  
+      "title":{
+  
+         "type":"string",
+
+         "minLength":1
+
+      },
+
+      "attributes":{
+  
+         "type":"array",
+
+          "minItems":1,
+
+         "items":{
+  
+          "type":"object",
+
+            "properties":{
+  
+               "name":{
+  
+                  "type":"string",
+                    "minLength":1
+
+               },
+
+
+  
+               "code":{
+  
+                  "type":"string",
+                    "minLength":1
+
+               },
+
+
+
+
+               "type":{ 
+ 
+                  "type":"string",
+
+                  "enum":[
+  
+                     "string",
+
+                     "number",
+
+                     "boolean"
+ 
+                 ]
+      
+         },
+    
+           "maxString":{
+  
+                  "type":"integer",
+                  "minimum":0
+
+            
+   },
+
+         
+            
+
+             "is_mandatory":{
+             "type":"boolean"
+            }
+    
+
+          },
+
+
+            "required":[
+
+               "name",
+               "code",
+               "type",        
+               "is_mandatory"
+            ],
+
+            "additionalProperties":false
+
+         },
+
+         
+         "uniqueItems":true
+
+      },
+      "foreign_keys":{
+  
+         "type":"array",
+
+         "items":{
+  
+          "type":"object",
+
+            "properties":{
+                "sharingTable":{
+  
+                  "type":"string",
+                    "minLength":1
+
+               },
+
+  
+               "sourceAttribute":{
+  
+                  "type":"string",
+                    "minLength":1
+
+               },
+
+               "destinationAttribute":{
+  
+                  "type":"string",
+                    "minLength":1
+
+               }
+             },
+
+            "required":[
+
+               "sourceAttribute",
+               "destinationAttribute"
+              
+            ],
+
+            "additionalProperties":false
+
+         },
+
+         
+         "uniqueItems":true
+
+      }
+      ,
+
+      "key":{
+  
+         "type":"array",
+
+         "uniqueItems":true,
+
+         "minItems":1,
+
+         "items":{ 
+ 
+            "type":"string"
+ 
+        }
+
+      },
+ 
+     "relations":{ 
+        
+ 
+         "type":"array",
+
+         "items":{
+               
+  
+            "type":"object",
+
+            "properties":{
+  
+               
+              "relation_title":{
+              "type":"string"
+              },
+              
+              "sourceKey":{
+  
+                  "type":"array",
+                  "minItems":1,
+                  "items":{
+                  "type":"string"
+                  }
+
+               },
+
+               "destinationKey":{
+  
+                  "type":"array",
+                  "minItems":1,
+                  "items":{
+                  "type":"string"
+                  }
+               },
+ 
+              "destinationTable":{
+  
+                  "type":"string"
+
+               }
+ 
+           },
+
+            "required":[
+              "relation_title",
+
+               "sourceKey", 
+
+               "destinationKey",  
+
+               "destinationTable"
+
+            ],
+ 
+           "additionalProperties":false
+
+         },
+
+         "minItems":1,
+
+         "uniqueItems":true
+
+      }
+
+   },
+
+   "required":[
+
+      "title",
+      "paket",
+      "parent",
+      "attributes",
+      "foreign_keys",
+      "key"
+
+   ],
+
+   "additionalProperties":false
+
+},
+                  
+    {
+      
+      
+      
+      
+      
+   "type":"array",
+      "minItems":1,
+   "items":{
+   "type":"object",
+     
+     "properties":{
+     
+       
+     "imePaketa":{
+     "type":"string"
+     },
+       
+     "roditelji":{
+    
+       "type":"string"
+       
+     
+     }
+   
+    
+          },
+   
+  "required":["imePaketa","roditelji"]
+   }  
+
+  
+  
+  
+      }]}}

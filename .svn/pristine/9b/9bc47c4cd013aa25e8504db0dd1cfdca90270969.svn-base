@@ -1,0 +1,270 @@
+package controller;
+
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.Image;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
+import javax.swing.AbstractAction;
+import javax.swing.BoxLayout;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JTextArea;
+import javax.swing.KeyStroke;
+import javax.swing.filechooser.FileNameExtensionFilter;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONTokener;
+
+import app.MyApp;
+
+
+public class Validation extends AbstractAction{
+	
+	
+
+	private JSONObject shema;
+	private JSONArray opis;
+	public Validation() {
+		// TODO Auto-generated constructor stub
+		
+Icon icon = new ImageIcon(new ImageIcon("resources/validation.jpg").getImage().getScaledInstance(35, 35, Image.SCALE_SMOOTH));
+		
+		putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_V, ActionEvent.CTRL_MASK));
+		putValue(MNEMONIC_KEY, KeyEvent.VK_V);
+		putValue(SMALL_ICON, icon);
+		putValue(NAME, MyApp.getInstance().getResourceBundle().getString("validateShema"));
+		putValue(SHORT_DESCRIPTION, MyApp.getInstance().getResourceBundle().getString("validateShema"));
+	
+	}
+	
+	
+	@Override
+	public void actionPerformed(ActionEvent arg0) {
+		// TODO Auto-generated method stub
+		
+		JFrame validationFrame = new JFrame(MyApp.getInstance().getResourceBundle().getString("validation"));
+		validationFrame.setResizable(true);
+		JPanel north = new JPanel(new BorderLayout());
+		JPanel center = new JPanel(new BorderLayout());
+		JPanel south = new JPanel(new BorderLayout());
+		JTextArea taS = new JTextArea();
+		JTextArea taO = new JTextArea();
+		JButton cnc = new JButton(MyApp.getInstance().getResourceBundle().getString("cancel"));
+		cnc.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				validationFrame.setVisible(false);
+			}
+		});
+	    taS = new JTextArea();
+	    
+	      taS.setText(MyApp.getInstance().getResourceBundle().getString("chooseMS"));
+	      taS.setEditable(false);
+	     JTextArea taS2 = new JTextArea();
+	      taS2.setPreferredSize(new Dimension(400,20));
+	      taS.setPreferredSize(new Dimension(300,20));
+	       taS2.setEditable(false);
+	       
+	       taO = new JTextArea();
+	       taO.setText(MyApp.getInstance().getResourceBundle().getString("chooseS"));
+	       taO.setEditable(false);
+	    JTextArea   taO2 = new JTextArea();
+	       taO2.setPreferredSize(new Dimension(400,20));
+	       taO.setPreferredSize(new Dimension(300,20));
+	        taO2.setEditable(false);
+	       
+		
+		
+       JButton srS = new JButton(MyApp.getInstance().getResourceBundle().getString("browse"));
+     
+       srS.addActionListener(new ActionListener() {
+		
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			// TODO Auto-generated method stub
+			
+			JFileChooser fc = new JFileChooser();
+			fc.setAcceptAllFileFilterUsed(false);
+	        FileNameExtensionFilter filter = new FileNameExtensionFilter("JSON", "json");
+	        fc.addChoosableFileFilter(filter);
+	       if(fc.showOpenDialog(null)==JFileChooser.APPROVE_OPTION){
+	        File f = fc.getSelectedFile();
+	        
+	        try {
+				InputStream inputStream = new BufferedInputStream(new FileInputStream(f));
+				JSONTokener token = new JSONTokener(inputStream);
+				shema = new JSONObject(token);
+		taS2.setText(f.getName());
+	        } catch (FileNotFoundException ea) {
+				// TODO Auto-generated catch block
+				System.out.println("nece");
+				ea.printStackTrace();
+			}catch (JSONException e2) {
+				// TODO: handle exception
+				StringWriter errors = new StringWriter();
+				e2.printStackTrace(new PrintWriter(errors));
+				
+				String greske[] = errors.toString().split("\n");
+				JOptionPane.showMessageDialog(null, MyApp.getInstance().getResourceBundle().getString("greskaMS")+greske[0], MyApp.getInstance().getResourceBundle().getString("error"), 1);
+				
+			
+			}
+	       }
+	       else {
+	    	   
+	       }
+		       
+		}
+	});
+      
+       JButton srO = new JButton("Browse");
+       
+       srO.addActionListener(new ActionListener() {
+		
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			// TODO Auto-generated method stub
+			
+			JFileChooser fc = new JFileChooser();
+			fc.setAcceptAllFileFilterUsed(false);
+	        FileNameExtensionFilter filter = new FileNameExtensionFilter("JSON", "json");
+	        fc.addChoosableFileFilter(filter);
+	       if(fc.showOpenDialog(null)==JFileChooser.APPROVE_OPTION){
+	        File f = fc.getSelectedFile();
+	        
+	        try {
+				InputStream inputStream = new BufferedInputStream(new FileInputStream(f));
+				JSONTokener token = new JSONTokener(inputStream);
+				//opis = new JSONObject(token);
+				opis = new JSONArray(token);
+
+		taO2.setText(f.getName());
+	        } catch (FileNotFoundException ea) {
+				// TODO Auto-generated catch block
+				System.out.println("nece");
+				ea.printStackTrace();
+			}catch (JSONException e2) {
+				// TODO: handle exception
+				StringWriter errors = new StringWriter();
+				e2.printStackTrace(new PrintWriter(errors));
+				
+				String greske[] = errors.toString().split("\n");
+				JOptionPane.showMessageDialog(null, MyApp.getInstance().getResourceBundle().getString("greskaShema")+greske[0], MyApp.getInstance().getResourceBundle().getString("error"), 1);	
+			
+			}
+	       }
+	       else {
+	    	   
+	       }
+			
+			
+		}
+	});
+       
+       
+       JButton valid = new JButton("Validate");
+   
+       
+       north.add(taS, BorderLayout.WEST);
+       north.add(srS,BorderLayout.CENTER);
+       north.add(taS2,BorderLayout.EAST);
+       
+       center.add(taO, BorderLayout.WEST);
+       center.add(srO,BorderLayout.CENTER);
+       center.add(taO2,BorderLayout.EAST);
+       BoxLayout boxLayout = new BoxLayout(validationFrame.getContentPane(), BoxLayout.Y_AXIS); //
+       validationFrame.setLayout(boxLayout);
+       validationFrame.add(north);
+       validationFrame.add(center);
+      JPanel p1 = new JPanel();
+      JPanel p2 = new JPanel();
+       JPanel dugmad = new JPanel(new BorderLayout());
+       dugmad.add(valid,BorderLayout.EAST);
+       dugmad.add(cnc,BorderLayout.WEST);
+       south.add(dugmad,BorderLayout.CENTER);
+       south.add(p1,BorderLayout.WEST);
+       south.add(p2,BorderLayout.EAST);
+       validationFrame.add(south);
+       validationFrame.setSize(800, 140);
+       validationFrame.setLocationRelativeTo(null);
+       validationFrame.setVisible(true);
+       valid.addActionListener(new ActionListener() {
+		
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			// TODO Auto-generated method stub
+			if(taS2.getText().equals("")||taO2.getText().equals("")) {
+			 JOptionPane.showMessageDialog(null, MyApp.getInstance().getResourceBundle().getString("msEmpty"), MyApp.getInstance().getResourceBundle().getString("error"), 1);
+                
+			}
+			else {
+				try {
+					JSON_Validator jv=new JSON_Validator();
+					jv.validate(shema, opis,false);
+					validationFrame.dispose();
+				}catch (JSONException ea) {
+					// TODO: handle exception
+					StringWriter errors = new StringWriter();
+					ea.printStackTrace(new PrintWriter(errors));
+					
+					String greske[] = errors.toString().split("/#");
+					JOptionPane.showMessageDialog(null,MyApp.getInstance().getResourceBundle().getString("greskaShema")+greske[0], MyApp.getInstance().getResourceBundle().getString("error"), 1);
+					
+				
+				}
+			
+			}
+		}
+	});
+       
+	
+	}
+
+
+	public JSONObject getShema() {
+		return shema;
+	}
+
+
+	public void setShema(JSONObject shema) {
+		this.shema = shema;
+	}
+
+
+	public JSONArray getOpis() {
+		return opis;
+	}
+
+
+	public void setOpis(JSONArray opis) {
+		this.opis = opis;
+	}
+
+}
+
+
+
+
+
+
+
+

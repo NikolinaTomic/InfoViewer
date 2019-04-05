@@ -1,0 +1,83 @@
+package tree;
+
+
+import javax.swing.JTree;
+import javax.swing.event.TreeModelListener;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeNode;
+import javax.swing.tree.TreePath;
+
+import model.Tabela;
+
+public class TreeModel extends DefaultTreeModel {
+	
+	public TreeModel(TreeNode arg0) {
+		super(arg0);
+		// TODO Auto-generated constructor stub
+	}
+
+	private Package root;
+	private JTree treeComponent;
+	
+	public TreeModel(Package p, JTree tree) {
+		super((TreeNode) p);
+		root =p;
+		treeComponent = tree;
+	//	treeComponent.setCellRenderer(new TreeRenderer()); //ovde povezan sa rendererom
+	}
+
+	@Override
+	public void addTreeModelListener(TreeModelListener arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public Object getChild(Object parent, int i) {
+		
+		return null;
+	}
+
+	@Override
+	public int getChildCount(Object parent) {
+		
+	
+		
+		return 0;
+	}
+
+	@Override
+	public int getIndexOfChild(Object arg0, Object arg1) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public Object getRoot() {
+		// TODO Auto-generated method stub
+		return root;
+	}
+
+	@Override
+	public boolean isLeaf(Object node) {
+		if (node instanceof Tabela)
+			return true;
+		return false;
+	}
+
+	@Override
+	public void removeTreeModelListener(TreeModelListener arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void valueForPathChanged(TreePath arg0, Object arg1) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	
+
+}

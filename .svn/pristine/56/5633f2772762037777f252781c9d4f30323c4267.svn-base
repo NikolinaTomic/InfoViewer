@@ -1,0 +1,30 @@
+package controller;
+
+
+	public class InfoClass {
+
+		private Object sendModel;
+		private String instruction;
+		
+		public InfoClass(Object mc, String i){
+			sendModel = mc;
+			instruction = i;
+		}
+		
+		public Object getSendModel() {
+			return sendModel;
+		}
+
+		public void setSendModel(Object sendModel) {
+			this.sendModel = sendModel;
+		}
+
+		public String getInstruction() {
+			return instruction;
+		}
+
+		public void setInstr(String instr) {
+			this.instruction = instr;
+		}
+	}
+

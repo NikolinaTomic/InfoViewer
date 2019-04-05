@@ -1,0 +1,18 @@
+package model;
+
+public class Paket {
+	private String ime;
+	
+	public Paket(String ime) {
+		this.setIme(ime);
+	}
+
+	public String getIme() {
+		return ime;
+	}
+
+	public void setIme(String ime) {
+		this.ime = ime;
+	}
+
+}

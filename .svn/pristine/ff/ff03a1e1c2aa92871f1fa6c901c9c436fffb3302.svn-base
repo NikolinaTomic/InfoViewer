@@ -1,0 +1,12 @@
+package controller;
+
+import java.util.ArrayList;
+
+import model.Paket;
+import model.Tabela;
+
+public interface Parser {
+	
+	public ArrayList<Object> parse(String sema, String semaPaket);
+
+}

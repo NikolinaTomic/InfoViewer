@@ -1,0 +1,28 @@
+package model;
+
+import java.util.ArrayList;
+
+public class TableModel{
+	
+	private Tabela tabela;
+	private ArrayList<TableModel> deca;
+	
+	public TableModel() {
+		tabela=new Tabela();
+		deca=new ArrayList<TableModel>();
+	}
+	
+	public Tabela getTabela() {
+		return tabela;
+	}
+	public void setTabela(Tabela tabela) {
+		this.tabela = tabela;
+	}
+	public ArrayList<TableModel> getDeca() {
+		return deca;
+	}
+	public void setDeca(ArrayList<TableModel> deca) {
+		this.deca = deca;
+	}
+
+}

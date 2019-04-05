@@ -1,0 +1,117 @@
+package controller;
+
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollBar;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+
+import model.Tabela;
+
+public class AddResurs implements AbstractAction {
+	public Tabela t;
+	public JTable table;
+	public AddResurs(Tabela t,JTable table) {
+		this.t=t;
+		this.table = table;
+		addData();
+	}
+	@Override
+	public boolean addData() {
+		// TODO Auto-generated method stub
+		JPanel main = new JPanel();
+		main.setSize(800, 600);
+		main.setLayout(new BoxLayout(main, BoxLayout.Y_AXIS));
+		JFrame validationFrame=new JFrame("Add data");
+		for(int i=0;i<t.getAttributes().size();i++) {
+			JPanel panel = new JPanel();
+			panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
+			panel.setSize(20,20);
+			
+			panel.setName(t.getAttributes().get(i).getName());
+			JLabel l=new JLabel(t.getAttributes().get(i).getName()+":" +"                 ");
+			String a = t.getAttributes().get(i).getName()+"*  :" +"                 ";
+			String tip = t.getAttributes().get(i).getType();
+			int duzina = t.getAttributes().get(i).getMaxString();
+			JTextField jta = new JTextField();
+			
+           jta.getDocument().addDocumentListener(new DocumentListener() {
+			
+			@Override
+			public void removeUpdate(DocumentEvent e) {
+				// TODO Auto-generated method stub
+				
+				 if(tip.equals("number")) {
+						jta.setToolTipText("Numeric field");
+					}
+				 else if(tip.equals("string")) {
+					 jta.setToolTipText("Text field");
+				 }
+				 
+				
+			}
+			
+			@Override
+			public void insertUpdate(DocumentEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void changedUpdate(DocumentEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+			
+			jta.setPreferredSize(new Dimension(20, 5));
+			jta.setSize(20, 5);
+			
+			//jta.setPreferredSize(new Dimension(20, 30));
+		
+			jta.setName(t.getAttributes().get(i).getName());
+			if(t.getAttributes().get(i).isIs_mandatory())
+				l.setText(a);
+			l.setName(a);
+			panel.add(l);
+			panel.add(jta);
+			main.add(panel);
+			
+		}
+
+		
+		JButton b=new JButton("Insert");
+		main.add(b);
+		b.setPreferredSize(new Dimension(110,30));
+		validationFrame.setSize(900, 400);
+	 	validationFrame.add(main);
+	     validationFrame.setLocationRelativeTo(null);
+	     validationFrame.setVisible(true);
+		
+		return false;
+	}
+	@Override
+	public boolean removeData() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+	@Override
+	public boolean updateData() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+}

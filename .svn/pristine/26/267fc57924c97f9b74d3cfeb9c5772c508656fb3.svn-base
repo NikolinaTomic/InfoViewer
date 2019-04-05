@@ -1,0 +1,35 @@
+package controller;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import model.Paket;
+import model.Tabela;
+
+public class TableManipulation {
+	private Tabela[] tabele;
+	ArrayList<String> parents;
+	String paket=null;
+	private ArrayList<Tabela>tabeleZaStablo;
+	private ArrayList<String>podpaketiZaStablo;
+	private HashMap<String, ArrayList<String>>parentChildren;
+	private HashMap<String, ArrayList<String>>packageTable;
+	private ArrayList<String>tabeleUPaketu;
+	public TableManipulation(Tabela[] input) {
+		tabele = input;
+		tabeleZaStablo = new ArrayList<>();
+		podpaketiZaStablo = new ArrayList<>();
+		parents = new ArrayList<>();
+		parentChildren = new HashMap<>();
+		packageTable = new HashMap<>();
+		tabeleUPaketu = new ArrayList<>();
+	}
+	
+	public void manipulate() {
+	
+		
+	
+		
+	}
+
+}

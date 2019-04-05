@@ -1,0 +1,192 @@
+package controller;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JTable;
+
+import app.MyApp;
+import model.Atributi;
+import model.Tabela;
+import model.TableModel;
+import view.TableView;
+
+public class RemoveData implements CRUDFactory{
+	JTable tabela;
+	Tabela t;
+	int red;
+	int w;
+	int h;
+	ArrayList<TableModel> listaTabela;
+	boolean dete;
+	Tabela roditelj;
+	boolean search;
+	boolean update;
+	
+	public RemoveData(JTable tabela,int red,Tabela t,int w,int h,ArrayList<TableModel> listaTabela,boolean dete,Tabela roditelj,boolean search,boolean update) {
+		// TODO Auto-generated constructor stub
+		this.tabela=tabela;
+		this.red=red;
+		this.t=t;
+		this.h=h;
+		this.w=w;
+		this.listaTabela=listaTabela;
+		this.dete=dete;
+		this.roditelj=roditelj;
+		this.search=search;
+		this.update=update;
+		removeData();
+	}
+	@Override
+	public boolean addData() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean removeData() {
+		// TODO Auto-generated method stub
+		//junit test za remove data da bude ako ima red manje kad se klikne onda je dobro
+		HashMap<String, String> kodoviKljuceva=new HashMap<>();
+		HashMap<String, Integer> kodPozicijaDB=new HashMap<>();
+		for(String k:t.getKey()) {
+			for(Atributi a:t.getAttributes()) {
+				if(a.getName().equals(k)) {
+					kodoviKljuceva.put(a.getCode(), a.getName());
+				}
+			}
+		}
+		Connection conn;
+		try {
+			conn = DriverManager.getConnection("jdbc:jtds:sqlserver://147.91.175.155/psw-2018-tim2-4","psw-2018-tim2-4","tim2-413090834");
+		
+
+		String izmena=t.getTitle();
+		if(t.getTitle().contains(" ")) {
+			String str = " ";
+			izmena=izmena.replace(str, "_");
+		}
+		String sql2="select COLUMN_NAME from INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='"+izmena+"'";
+		PreparedStatement pstmt2 = conn.prepareStatement(sql2);
+		
+		ResultSet rset2 = pstmt2.executeQuery();
+		int br=0;
+		while(rset2.next()) { //NAZIVI KOLONA
+			for(int i=0;i<1;i++) {
+				//System.out.println(rset2.getString(i+1));
+				for(String s:kodoviKljuceva.keySet()) {
+					if(s.equals(rset2.getString(i+1))) {
+						kodPozicijaDB.put(s, br);
+						//System.out.println(br);
+					}
+				}
+			}
+			br++;
+		}
+		rset2.close();
+		pstmt2.close();
+			
+		HashMap<String, String> kodVrednost=new HashMap<>();
+		for(String s: kodPozicijaDB.keySet()) {
+			kodVrednost.put(s, tabela.getValueAt(red, kodPozicijaDB.get(s)).toString());
+			//System.out.println(s+" "+tabela.getValueAt(red, kodPozicijaDB.get(s)).toString());
+		}
+		int pozicija=0;
+		String nov="";
+		String sql="DELETE FROM "+izmena+" WHERE ";
+			for(String k:kodVrednost.keySet()) {
+			sql+=k+" = "+"\'"+kodVrednost.get(k)+"\'" + " and ";
+		}
+		
+		pozicija=sql.lastIndexOf("and");
+		nov = sql.substring(0, pozicija-1);
+		//System.out.println(sql);
+		PreparedStatement pstmt = conn.prepareStatement(nov);
+
+		pstmt.executeUpdate(); 
+		pstmt.close();
+		
+//ako je tabla dete razlicito se crta u tableView
+		if(dete) {
+			Row rw=new Row(); 
+			Object[][] data=rw.konekcijaSaBazom(roditelj);
+			ArrayList<TableModel> deca=new ArrayList<>();
+			for(TableModel tm:listaTabela) {
+				if(tm.getTabela().getTitle().equals(roditelj.getTitle())) {
+					deca=tm.getDeca();
+				}
+			}
+			ArrayList<Tabela> decaT=new ArrayList<>();
+			for(TableModel tm: deca) {
+				decaT.add(tm.getTabela());
+			}
+		HashMap<Tabela, Object[][]> data2=rw.konekcijaSaBazomDeca(decaT);
+		TableView is=new TableView(listaTabela,roditelj.getTitle());
+		JPanel pa=is.iscrtavanje(w,h,data,data2);
+		MyApp.getInstance().addToCentralPanel2(pa);	 
+		}
+		else {
+			Row rw=new Row(); 
+			Object[][] data=rw.konekcijaSaBazom(t);
+			ArrayList<TableModel> deca=new ArrayList<>();
+			for(TableModel tm:listaTabela) {
+				if(tm.getTabela().getTitle().equals(t.getTitle())) {
+					deca=tm.getDeca();
+				}
+			}
+			ArrayList<Tabela> decaT=new ArrayList<>();
+			for(TableModel tm: deca) {
+				decaT.add(tm.getTabela());
+			}
+		HashMap<Tabela, Object[][]> data2=rw.konekcijaSaBazomDeca(decaT);
+		TableView is=new TableView(listaTabela,t.getTitle());
+		JPanel pa=is.iscrtavanje(w,h,data,data2);
+		MyApp.getInstance().addToCentralPanel2(pa);	 
+		}
+		if(search) {
+			//System.out.println("USAO");
+			Row rw=new Row(); 
+			Object[][] data=rw.konekcijaSaBazom(t);
+			String[] columnNames=rw.uzmiHeadere(t);
+			if(!update) {
+			SearchData ss = new SearchData(data,columnNames,t.getTitle(),t,listaTabela,w,h,dete,roditelj,tabela); 
+			}
+			
+		}
+
+		if(!update) {
+		JOptionPane.showMessageDialog(null, "Success!\n");
+		}
+
+		
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			//ako je neko povezan sa ovim sto se brise j option pane
+			return false;
+		}
+
+		//ako je broj kolona manji za 1 onda je true
+		return true;
+	}
+
+	@Override
+	public boolean updateData() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+	@Override
+	public void searchData() {
+		// TODO Auto-generated method stub
+		
+	}
+	
+
+}

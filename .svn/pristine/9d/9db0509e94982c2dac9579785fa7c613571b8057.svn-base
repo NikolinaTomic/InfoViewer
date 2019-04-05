@@ -1,0 +1,111 @@
+
+package controller;
+
+import java.awt.Dimension;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.HashMap;
+
+import javax.swing.JTree;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeCellRenderer;
+import javax.swing.tree.TreePath;
+
+import com.fasterxml.jackson.databind.node.ArrayNode;
+
+import model.Paket;
+import model.PaketModel;
+import model.Tabela;
+import view.TreeAndTable;
+import view.TreeCallRenderer;
+
+public class TreeManipulation extends JTree{
+	private Tabela[] tabele;
+	private Paket[] paketi;
+	ArrayList<String> parents;
+	String paket=null;
+	Paket p = new Paket();
+	
+	private ArrayList<Tabela>tabeleZaStablo;
+	private ArrayList<Tabela>tabeleUAraryList;
+	private ArrayList<Paket>paketiUAraryList;
+	
+	private ArrayList<Paket>podpaketiZaStablo;
+	private HashMap<String, ArrayList<String>>parentChildren;
+	private HashMap<String, ArrayList<String>>packageTable;
+	private ArrayList<String>tabeleUPaketu;
+	public TreeManipulation(Tabela[] sveTabele,Paket[] sviPaketi) {
+		tabele = sveTabele;
+		paketi = sviPaketi;
+		tabeleZaStablo = new ArrayList<>();
+		podpaketiZaStablo = new ArrayList<>();
+		parents = new ArrayList<>();
+		parentChildren = new HashMap<>();
+		packageTable = new HashMap<>();
+		tabeleUPaketu = new ArrayList<>();
+		tabeleUAraryList = new ArrayList<>();
+		paketiUAraryList = new ArrayList<>();
+	}
+	
+	public void manipulate() {
+		if(tabele!=null) {
+		for(int i=0;i<tabele.length;i++) {
+			tabeleUAraryList.add(tabele[i]);
+		}
+		}
+		if(paketi!=null) {
+
+		for(int i=0;i<paketi.length;i++) {
+			paketiUAraryList.add(paketi[i]);
+		}
+		}
+	
+		for(int i=0;i<paketiUAraryList.size();i++) {
+			if(paketiUAraryList.get(i).getRoditelji()!="" && paketiUAraryList.get(i).getRoditelji()!=null) {
+			
+				podpaketiZaStablo.add(paketiUAraryList.get(i));
+				paketiUAraryList.remove(i);
+			}
+		}
+		
+        TreeAndTable tm = new TreeAndTable();
+        tm.getInstance().init(podpaketiZaStablo,tabeleUAraryList);
+       
+        
+	
+		
+	}
+	
+	public void refreshModel(){
+		((DefaultTreeModel)this.getModel()).reload();
+	}
+	
+	
+	public TreeManipulation (Paket w,ArrayList<Paket> a,ArrayList<Tabela> t){
+		super(new DefaultMutableTreeNode(w));
+		
+		
+		this.setCellRenderer(new TreeCallRenderer());
+		this.setPreferredSize(new Dimension(200,150));
+		this.setVisible(true);	
+		
+	}
+	
+	private TreePath find(DefaultMutableTreeNode root, String s) {
+	    @SuppressWarnings("unchecked")
+	    Enumeration<DefaultMutableTreeNode> e = root.depthFirstEnumeration();
+	    while (e.hasMoreElements()) {
+	        DefaultMutableTreeNode node = e.nextElement();
+	        if (node.toString().equalsIgnoreCase(s)) {
+	            return new TreePath(node.getPath());
+	        }
+	    }
+	    return null;
+	}
+	
+
+}
+
+
+

@@ -1,0 +1,35 @@
+package view;
+
+import java.util.Observable;
+import java.util.Observer;
+
+import javax.swing.tree.DefaultMutableTreeNode;
+
+import app.MyApp;
+import controller.InfoClass;
+import model.TableModel;
+
+public class CvorStablaT extends DefaultMutableTreeNode implements Observer{
+
+	 public CvorStablaT(Object o) {
+		// TODO Auto-generated constructor stub
+   this.setUserObject(o);
+	}
+	@Override
+	public void update(Observable arg0, Object arg1) {
+		// TODO Auto-generated method stub
+		InfoClass ic = (InfoClass) arg1;
+		TableModel tabela = (TableModel) ic.getSendModel();
+		if(ic.getInstruction().equals("nodeChanged")) {
+			for(int i=0;i<tabela.getDeca().size();i++) {
+				TableModel tm = (TableModel) tabela.getDeca().get(i);
+				CvorStablaT cvor = new CvorStablaT(tm);
+				tm.addObserver(cvor);
+				MyApp.getInstance().getModel().insertNodeInto(cvor, this, this.getChildCount());
+			tm.promenaUStablu();
+			}
+		}
+	  
+	}
+
+}

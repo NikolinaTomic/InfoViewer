@@ -1,0 +1,146 @@
+package controller;
+
+import java.io.IOException;
+import java.util.ArrayList;
+
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import app.MyApp;
+import model.Paket;
+import model.PaketModel;
+import model.Tabela;
+import model.TableModel;
+
+public class JSON_Parser implements Parser{
+
+	@Override
+	public void parse(Object sem) {
+		String semaPaketi=(String) sem;
+		int pocPaketa=semaPaketi.indexOf("\"imePaketa\"");
+		String sema="";
+		String paketici="";
+		String PAKETI="";
+		String TABELE="";
+		Paket[] car= {};
+		if(pocPaketa!=-1) {
+		String znak=semaPaketi.substring(pocPaketa-1,pocPaketa);
+		for(int i=1;i<50;i++) { //ako je tabele pa paketi
+			if(znak.equals("[")) {
+				sema=semaPaketi.substring(0,pocPaketa-i-1);
+				sema=sema+"]";
+				//System.out.println(sema);
+				TABELE=sema;
+				//sema=opis.toString().substring(0,pocPaketa-i+15);
+				paketici=semaPaketi.substring(pocPaketa-i,semaPaketi.length());
+				paketici=paketici.substring(0,paketici.length()-1);
+				PAKETI=paketici;
+				break;
+			}else {
+				znak=semaPaketi.substring(pocPaketa-1-i,pocPaketa-i);
+			}
+		}
+		
+		ObjectMapper objectMapper = new ObjectMapper();
+		objectMapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
+		objectMapper.configure(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT, true);
+		objectMapper.configure(DeserializationFeature.ACCEPT_EMPTY_ARRAY_AS_NULL_OBJECT, true);
+
+		
+		try {
+			car = objectMapper.readValue(PAKETI, Paket[].class);
+		} catch (JsonParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JsonMappingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		}else {
+			/////ODRADI AKO NEMA PAKETE
+			TABELE=(String) sem;
+		}
+
+		ObjectMapper objectMapper = new ObjectMapper();
+		objectMapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
+		objectMapper.configure(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT, true);
+		objectMapper.configure(DeserializationFeature.ACCEPT_EMPTY_ARRAY_AS_NULL_OBJECT, true);
+		Tabela[] tabela=null;
+		
+		try {
+			tabela = objectMapper.readValue(TABELE, Tabela[].class);
+		} catch (JsonParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JsonMappingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		ArrayList<PaketModel> paketModeli=new ArrayList<>();
+		if(car.length!=0) {
+		for(Paket p:car) { //pravi se lista paketa
+			PaketModel pm=new PaketModel();
+			pm.setPaket(p);
+			pm.setDeca(new ArrayList<>());
+			paketModeli.add(pm);
+		}
+		}
+		ArrayList<TableModel> tabelaModeli=new ArrayList<>();
+		for(Tabela p:tabela) { //pravi se lista tabela
+			TableModel tm=new TableModel();
+			tm.setTabela(p);
+			tm.setDeca(new ArrayList<>());
+			tabelaModeli.add(tm);
+		}
+		
+		for(PaketModel pm: paketModeli) {
+			if(!pm.getPaket().getRoditelji().equals("")) { //ako ima paket u kome je paket ubaci u njegovog roditelja njega kao dete
+				for(PaketModel pm2: paketModeli) {
+					if(pm2.getPaket().getImePaketa().equals(pm.getPaket().getRoditelji())) {
+						pm2.getDeca().add(pm);
+						break;
+					}
+				}
+			}
+		}
+		
+		for(TableModel tm:tabelaModeli) {
+			if(!tm.getTabela().getPaket().equals("")) {//ako ima paket u kome je tabela ubaci u njegovog roditelja njega kao dete
+				for(PaketModel pm2: paketModeli) {
+					if(pm2.getPaket().getImePaketa().equals(tm.getTabela().getPaket())) {
+						pm2.getDeca().add(tm);
+						break;
+					}
+				}
+			}
+			if(tm.getTabela().getParent().size()!=0) { //ako ima tabela u kojoj je tabela u njenog roditelja stavi nju kao dete
+				for(String rod: tm.getTabela().getParent()) {
+					for(TableModel tm2:tabelaModeli) {
+						if(tm2.getTabela().getTitle().equals(rod)) {
+							tm2.getDeca().add(tm);
+							break;
+						}
+					}
+				}
+			}
+		}
+
+		MyApp.getInstance().setPaketModeli(paketModeli);
+		MyApp.getInstance().setTabelaModeli(tabelaModeli);
+		MyApp.getInstance().initTree();
+
+		
+	}
+
+		
+}

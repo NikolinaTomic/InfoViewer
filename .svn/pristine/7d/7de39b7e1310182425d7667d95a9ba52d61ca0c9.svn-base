@@ -1,0 +1,198 @@
+{  
+   "$schema":"http://json-schema.org/draft-07/schema#",
+
+   "title":"Meta-Shema",
+
+   "type":"object",
+
+   "properties":{
+  
+      "title":{
+  
+         "type":"string",
+
+         "minLength":1
+
+      },
+
+      "attributes":{
+  
+         "type":"array",
+
+          "minItems":1,
+
+         "items":{
+  
+          "type":"object",
+
+            "properties":{
+  
+               "name":{
+  
+                  "type":"string",
+                    "minLength":1
+
+               },
+
+
+  
+               "code":{
+  
+                  "type":"string",
+                    "minLength":1
+
+               },
+
+
+
+
+               "type":{ 
+ 
+                  "type":"string",
+
+                  "enum":[
+  
+                     "string",
+
+                     "number",
+
+                     "boolean"
+ 
+                 ]
+      
+         },
+    
+           "MaxLength":{
+  
+                  "type":"integer"
+
+            
+   },
+
+               "is_null":{
+  
+                  "type":"boolean"
+
+     },
+
+            
+
+             "is_mandatory":{
+             "type":"boolean"
+            }
+    
+
+          },
+
+
+            "required":[
+
+               "name",
+               "code",
+               "type",
+
+               "is_null",
+               "is_mandatory"
+
+
+
+            ],
+
+            "additionalProperties":false
+
+         },
+
+         
+         "uniqueItems":true
+
+      },
+
+      "key":{
+  
+         "type":"array",
+
+         "uniqueItems":true,
+
+         "minItems":1,
+
+         "items":{ 
+ 
+            "type":"string"
+ 
+        }
+
+      },
+ 
+     "relations":{ 
+        
+ 
+         "type":"array",
+
+         "items":{
+               
+  
+            "type":"object",
+
+            "properties":{
+  
+               
+              "title":{
+              "type":"string"
+              },
+              
+              "sourceKey":{
+  
+                  "type":"string"
+
+               },
+
+               "destinationKey":{
+  
+                  "type":"string"
+
+               },
+ 
+              "destinationTable":{
+  
+                  "type":"string"
+
+               }
+ 
+           },
+
+            "required":[
+              "title",
+
+               "sourceKey",
+
+               "destinationKey",
+
+               "destinationTable"
+
+            ],
+ 
+           "additionalProperties":false
+
+         },
+
+         "minItems":1,
+
+         "uniqueItems":true
+
+      }
+
+   },
+
+   "required":[
+
+      "title",
+
+      "attributes",
+
+      "key"
+
+   ],
+
+   "additionalProperties":false
+
+}

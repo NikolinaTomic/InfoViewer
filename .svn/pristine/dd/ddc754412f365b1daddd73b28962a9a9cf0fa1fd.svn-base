@@ -1,0 +1,60 @@
+package tree;
+
+import java.awt.Color;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import javax.swing.JPanel;
+import javax.swing.JTree;
+import javax.swing.tree.DefaultMutableTreeNode;
+
+import app.MyApp;
+import controller.Row;
+import model.PaketModel;
+import model.Tabela;
+import model.TableModel;
+import view.IscrtajTabelu;
+import view.TreeAndTable;
+
+public class TreeSelectionListener extends MouseAdapter{
+	private ArrayList<PaketModel> paketModeli;
+	private ArrayList<TableModel> tabeleModeli;
+	
+	public TreeSelectionListener(ArrayList<PaketModel> p,ArrayList<TableModel> t) {
+		paketModeli=p;
+		tabeleModeli=t;
+	}
+	@Override
+	public void mousePressed(MouseEvent e) {
+
+		if (e.getClickCount() == 2 && !e.isConsumed()) {
+			JTree tree=(JTree) e.getSource();
+			DefaultMutableTreeNode node=(DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
+			if(node!=null && node.getUserObject() instanceof TableModel) {
+				TableModel selectedNode=(TableModel) node.getUserObject();
+				for(TableModel x:tabeleModeli) {
+					ArrayList<Tabela> deca=new ArrayList<>();
+					if(x.getTabela().getTitle().equals(selectedNode.getTabela().getTitle())) {
+						for(TableModel xx:tabeleModeli) {
+							for(String s:xx.getTabela().getParent()) {
+								if(s.equals(x.getTabela().getTitle())) {
+									deca.add(xx.getTabela());
+								}
+							}
+						}
+						
+					}
+				}
+				//pa=is.iscrtavanje(mainFrame.getWidth()-levi.getWidth(),mainFrame.getHeight(),data,data2);
+				//pa.setBackground(new Color(200,200, 200));
+				JPanel pa=new JPanel();
+				pa.setBackground(Color.RED);
+				pa.setVisible(true);
+				MyApp.getInstance().addToCentralPanel2(pa);
+			}
+		}
+	}
+	
+}

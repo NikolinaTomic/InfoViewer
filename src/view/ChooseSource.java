@@ -1,0 +1,62 @@
+package view;
+
+import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.ButtonGroup;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+
+import app.MyApp;
+
+public class ChooseSource extends JFrame {
+	
+	public ChooseSource() {
+	JFrame validationFrame = new JFrame(MyApp.getInstance().getResourceBundle().getString("chooseD"));
+	validationFrame.setResizable(true);
+	
+	JPanel p=new JPanel(new FlowLayout());
+	JRadioButton json=new JRadioButton(MyApp.getInstance().getResourceBundle().getString("jsonF"));
+	JRadioButton db=new JRadioButton(MyApp.getInstance().getResourceBundle().getString("db"));
+	db.setSelected(false);
+	json.setSelected(false);
+	ButtonGroup group = new ButtonGroup();
+	group.add(json);
+	group.add(db);
+	p.add(json);
+	p.add(db);
+
+	json.addActionListener(new ActionListener() {
+		
+		@Override
+		public void actionPerformed(ActionEvent arg0) {
+			// TODO Auto-generated method stub
+			MyApp IV = MyApp.getInstance();
+			IV.setSource(false);
+			IV.revalidate();
+			IV.repaint();
+			IV.setVisible(true);
+			validationFrame.dispose();
+		}
+	});
+	
+	db.addActionListener(new ActionListener() {
+		
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			DBDialog db = new DBDialog();
+			// TODO Auto-generated method stub
+	
+			validationFrame.dispose();
+		}
+	});
+	
+	 validationFrame.add(p);
+     validationFrame.setSize(300, 80);
+     validationFrame.setLocationRelativeTo(null);
+     validationFrame.setVisible(true);
+	}
+
+}

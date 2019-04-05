@@ -1,0 +1,66 @@
+package view;
+
+import java.awt.Component;
+import java.awt.Image;
+import java.util.ArrayList;
+
+import javax.swing.ImageIcon;
+import javax.swing.JTree;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeCellRenderer;
+
+import model.Paket;
+import model.Tabela;
+
+
+public class TreeCallRenderer extends DefaultTreeCellRenderer {
+
+	ArrayList<Paket> paketi=new ArrayList<>();
+	ArrayList<Tabela> tabele=new ArrayList<>();
+	
+	public TreeCallRenderer(ArrayList<Paket> paketi,ArrayList<Tabela> tabele) {
+		this.paketi=paketi;
+		this.tabele=tabele;
+	}
+	public Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel, boolean expanded, boolean leaf,
+			int row, boolean hasFocus) {
+		super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
+
+		// ÄŒvor koga treba iscrtati.
+		DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
+		Object o = node.getUserObject();
+		//System.out.println(o.toString());
+
+		// PodeÅ¡avanje tekst Ä�vora koji se iscrtava na osnovu naziva Ä�lanka ili
+		// kategorije iz modela.
+		if(o.toString().equals("Root")) {
+			ImageIcon ikonica = new ImageIcon("resources/paket.png");
+			Image img = ikonica.getImage();
+			Image img2 = img.getScaledInstance(20, 20, java.awt.Image.SCALE_SMOOTH);
+			ikonica = new ImageIcon(img2);
+			setIcon(ikonica);
+		}
+		
+		for(Paket x:paketi) {
+			if(x.getImePaketa().equals(o.toString())) {
+				setText(o.toString());
+				ImageIcon ikonica = new ImageIcon("resources/paket.png");
+				Image img = ikonica.getImage();
+				Image img2 = img.getScaledInstance(20, 20, java.awt.Image.SCALE_SMOOTH);
+				ikonica = new ImageIcon(img2);
+				setIcon(ikonica);
+			}}
+		
+		for(Tabela x:tabele) {
+			if(x.getTitle().equals(o.toString())) {
+				setText(o.toString());
+				ImageIcon ikonica = new ImageIcon("resources/table.png");
+				Image img = ikonica.getImage();
+				Image img2 = img.getScaledInstance(20, 20, java.awt.Image.SCALE_SMOOTH);
+				ikonica = new ImageIcon(img2);
+				setIcon(ikonica);
+			}}
+			
+				return this;
+	}
+}

@@ -1,0 +1,9 @@
+package controller;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+public interface Validator {
+	public void validate(JSONObject shema,JSONArray opis,boolean koZove);
+	
+}

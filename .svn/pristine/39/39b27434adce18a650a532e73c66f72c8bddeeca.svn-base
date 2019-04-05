@@ -1,0 +1,17 @@
+package app;
+
+import javax.swing.JToolBar;
+
+import controller.ActionManager;
+
+public class MyToolBar extends JToolBar{
+	public MyToolBar() {
+		
+		super(JToolBar.HORIZONTAL);
+		setFloatable(false);
+		
+		add(ActionManager.getInstance().getShema());
+		add(ActionManager.getInstance().getLd());
+	    add(ActionManager.getInstance().getV());
+	}
+}

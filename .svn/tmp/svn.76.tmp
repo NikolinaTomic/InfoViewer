@@ -1,0 +1,42 @@
+package model;
+
+import java.util.ArrayList;
+
+public class Relacija {
+	
+	private String relation_title;
+	private ArrayList<String> sourceKey;
+	private ArrayList<String> destinationKey;
+	private String destinationTable;
+	
+	public String getRelation_title() {
+		return relation_title;
+	}
+	public void setRelation_title(String relation_title) {
+		this.relation_title = relation_title;
+	}
+	public ArrayList<String> getSourceKey() {
+		return sourceKey;
+	}
+	public void setSourceKey(ArrayList<String> sourceKey) {
+		this.sourceKey = sourceKey;
+	}
+	public ArrayList<String> getDestinationKey() {
+		return destinationKey;
+	}
+	public void setDestinationKey(ArrayList<String> destinationKey) {
+		this.destinationKey = destinationKey;
+	}
+	public String getDestinationTable() {
+		return destinationTable;
+	}
+	public void setDestinationTable(String destinationTable) {
+		this.destinationTable = destinationTable;
+	}
+	@Override
+	public String toString() {
+		return "Relacija [title=" + relation_title + ", sourceKey=" + sourceKey + ", destinationKey=" + destinationKey
+				+ ", destinationTable=" + destinationTable + "]";
+	}
+
+}

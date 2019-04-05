@@ -1,0 +1,312 @@
+package controller;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import javax.swing.JOptionPane;
+
+import org.everit.json.schema.Schema;
+import org.everit.json.schema.loader.SchemaLoader;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import model.Tabela;
+
+public class JSON_Validator implements Validator{
+
+	@Override
+	public void validate(JSONObject shema, JSONArray opis,boolean koZove) { //true znaci zove parser
+		// TODO Auto-generated method stub
+Schema schema = SchemaLoader.load(shema);
+		
+		ValidatorTest validator = new ValidatorTest(schema,opis);
+		
+		if(validator.validateAll().equals("") && validator.validateFailEarly().equals("") && validator.validateJsonDetails().equals("")) {
+			String sema=opis.toString();
+			ArrayList<String> naziviObelezja=new ArrayList<String>();
+			boolean sviKsuValid=true;
+			HashMap<String, ArrayList<String>> tabeleIObelezja=new HashMap<String,ArrayList<String>>(); //da bi se proverilo da li destination key postoji u destination table
+			HashMap<String, ArrayList<String>> tabelaObProvera=new HashMap<String,ArrayList<String>>();
+			HashMap<String, String> parenti=new HashMap<String,String>(); //jer ne moze biti sam sebi parent pa je kljuc titl a vrednost parent
+			//ne moze sema da se parsira ne tabele po title jer title moze biti i na kraju tab ne mora na pocetku
+			while(true) {
+				int pocNaziva=sema.indexOf("\"title\"");
+				String nazivDoKraja=sema.substring(pocNaziva+7);
+			
+				int nazP=nazivDoKraja.indexOf('"');
+				String titl=nazivDoKraja.substring(nazP+1);
+				int krajP=titl.indexOf('"');
+				titl=titl.substring(0, krajP);
+				String roditelj="";
+				int pocPar=sema.indexOf("\"parent\"");
+				String podPar=sema.substring(pocPar);
+				int pocPa=podPar.indexOf("[");
+				int krajPa=podPar.indexOf("]");
+				String parent=podPar.substring(pocPa+1, krajPa);
+				if(parent.indexOf('"')!=-1) {
+					int parPravi=parent.indexOf('"');
+					String pod=parent.substring(parPravi+1);
+					int parPraviKraj=pod.indexOf('"');
+					roditelj=parent.substring(parPravi+1,parPraviKraj+parPravi+1);
+				
+				}
+				parenti.put(titl, roditelj);	
+				int pocetak=sema.indexOf("\"attributes\"");
+				String skraceno=sema.substring(pocetak);
+				int krajA=skraceno.indexOf(']'); 
+				String podsema=sema.substring(pocetak,krajA+pocetak);
+		
+				naziviObelezja=new ArrayList<String>();
+				while(podsema.indexOf("\"name\"")!=-1) {
+					int poc=podsema.indexOf("\"name\"");
+					String xx=podsema.substring(poc+6);
+					int poc2=xx.indexOf('"');
+					String yy=xx.substring(poc2+1);
+					int kraj=yy.indexOf('"');
+					String obelezje=yy.substring(0,kraj);
+		
+					naziviObelezja.add(obelezje);
+					podsema=yy;
+				}
+				tabeleIObelezja.put(titl, naziviObelezja);
+			
+				int pocK=sema.indexOf("\"key\"");
+				String podK=sema.substring(pocK,sema.length());
+				int pocZagrada=podK.indexOf("[");
+				int zatZagrada=podK.indexOf("]");
+				String kljucevi=podK.substring(pocZagrada+1, zatZagrada);
+				boolean nasao1=false;
+				while(kljucevi.indexOf('"')!=-1) {
+			
+					int prvi=kljucevi.indexOf('"');
+					String kljucevi2=kljucevi.substring(prvi+1);
+					int kraj2=kljucevi2.indexOf('"');
+					String kljuc=kljucevi2.substring(0,kraj2);
+					
+					for(String ob:naziviObelezja) {
+						if(kljuc.equals(ob)) {
+							nasao1=true;
+						}
+					}
+					if(nasao1==false) {
+						JOptionPane.showMessageDialog(null, "Key from shema doesn't exist as an attribute! Unsuccessful validation!", "Error", 1);
+						sviKsuValid=false;
+						return;
+					}else {
+						nasao1=false;
+					}
+			
+					kljucevi=kljucevi2.substring(kraj2+1);
+
+				}
+				if(sviKsuValid==true) { //source key
+					int relcijeP=sema.indexOf("\"relations\"");
+					//AKO NEMA RELACIJE
+					String relacije=sema.substring(relcijeP);
+			
+					int pocR=relacije.indexOf("{");
+					int krajR=relacije.indexOf("}");
+					int odmakao=pocR;
+					String jednaRel=relacije.substring(pocR,krajR+1);
+			//System.out.println(jednaRel);
+					String krajRelacija="";
+					String krajRelacija2="";
+					boolean sledeciSTOP=false;
+					String jednaRel2="";
+					while(sledeciSTOP!=true) {
+						if(krajRelacija.equals("]")) {sledeciSTOP=true;}
+							int pocDestT=jednaRel.indexOf("\"destinationTable\"");
+							String destT=jednaRel.substring(pocDestT+18);
+							int destTP=destT.indexOf('"');
+							String destTable=destT.substring(destTP+1);
+							int krajdestTP=destTable.indexOf('"');
+							destTable=destTable.substring(0, krajdestTP);
+			//System.out.println("destination table "+destTable);
+							int pocSource2=jednaRel.indexOf("\"destinationKey\"");
+							String podS2=jednaRel.substring(pocSource2,jednaRel.length()); //od source key do kraja
+							int poZagrada2=podS2.indexOf("[");
+							int zaZagrada2=podS2.indexOf("]");
+			
+							String kljucev2=podS2.substring(poZagrada2+1, zaZagrada2); 
+							ArrayList<String> d=new ArrayList<String>();
+							while(kljucev2.indexOf('"')!=-1) {
+			
+								int prvi2=kljucev2.indexOf('"');
+								String kljucevi22=kljucev2.substring(prvi2+1);
+								int kraj22=kljucevi22.indexOf('"');
+								String kljuc2=kljucevi22.substring(0,kraj22);
+								d.add(kljuc2);
+
+								kljucev2=kljucevi22.substring(kraj22+1);
+
+							}
+							if(tabelaObProvera.containsKey(destTable)) {
+								for(String b:d) {
+									tabelaObProvera.get(destTable).add(b);
+								}
+							}else {
+								tabelaObProvera.put(destTable, d);
+							}
+			
+							int pocSource=jednaRel.indexOf("\"sourceKey\"");
+							String podS=jednaRel.substring(pocSource,jednaRel.length()); //od source key do kraja
+							int poZagrada=podS.indexOf("[");
+							int zaZagrada=podS.indexOf("]");
+			
+							String kljucev=podS.substring(poZagrada+1, zaZagrada); 
+							while(kljucev.indexOf('"')!=-1) {
+								int prvi=kljucev.indexOf('"');
+								String kljucevi2=kljucev.substring(prvi+1);
+								int kraj2=kljucevi2.indexOf('"');
+								String kljuc=kljucevi2.substring(0,kraj2);
+			//System.out.println("SOURCE KEY "+kljuc);
+								boolean nasao=false;
+								for(String ob:naziviObelezja) {
+									if(kljuc.equals(ob)) {
+										nasao=true;
+									}
+								}	
+		
+								if(nasao==false) {
+									JOptionPane.showMessageDialog(null, "SourceKey from shema doesn't exist as an attribute! Unsuccessful validation!", "Error", 1);
+									sviKsuValid=false;
+									return;
+								}else {
+									nasao=false;
+								}
+								kljucev=kljucevi2.substring(kraj2+1);
+
+							}
+							odmakao+=jednaRel.length();
+							krajRelacija=relacije.substring(odmakao, odmakao+1);
+							krajRelacija2=relacije.substring(odmakao+1, odmakao+2);
+							if(krajRelacija.equals("]") || krajRelacija2.equals("]") )break;
+							jednaRel2=relacije.substring(odmakao,relacije.length());
+							int pocR2=jednaRel2.indexOf("{");
+							int krajR2=jednaRel2.indexOf("}");
+							jednaRel=jednaRel2.substring(pocR2,krajR2+2);
+
+					}
+
+					int noviPocTabele=0;
+		
+					if(krajA>(zatZagrada+pocK)) {
+						noviPocTabele=krajA;
+					}else {
+						noviPocTabele=zatZagrada+pocK;
+					}
+					if(odmakao>noviPocTabele) { noviPocTabele=odmakao+1;}
+					if((nazP+pocNaziva+7)>noviPocTabele) {noviPocTabele=(nazP+1+pocNaziva+7);}
+					sema=sema.substring(noviPocTabele+2, sema.length());
+					int provera=sema.indexOf("\"attributes\"");
+					if(provera==-1) {break;}				
+					if(sviKsuValid==true) { //dest key
+		
+					}else {
+						
+					}
+		
+				}else {}
+			}
+			if(sviKsuValid==true) {
+				boolean sadrzi=true;
+				boolean nemaOb2=false;
+		
+		/*for(String l:tabeleIObelezja.keySet()) {
+			System.out.println("KLJUC "+l);
+			for(String s:tabeleIObelezja.get(l)) {
+				System.out.println(s);
+			}
+			System.out.println("/n");
+		}*/
+		
+		for(String tab : tabelaObProvera.keySet() ) {
+			//System.out.println("KLJUC "+tab);
+			sadrzi=tabeleIObelezja.containsKey(tab);
+			if(sadrzi==false) {
+				JOptionPane.showMessageDialog(null, "Destination table from shema doesn't exist as a table! Unsuccessful validation!", "Error", 1);
+				sviKsuValid=false;
+				return;
+			}else {
+				//System.out.println(tabelaObProvera.get(tab));
+				boolean pronadjenOb=false;
+				for(String o: tabelaObProvera.get(tab)) {
+					//System.out.println("OB PROVERA "+o);
+					ArrayList<String> obb=tabeleIObelezja.get(tab);
+					for(String ob :obb) {
+						//System.out.println(ob);
+						if(o.equals(ob)) {
+							pronadjenOb=true;
+						
+					}
+					}
+					if(pronadjenOb==false){
+						JOptionPane.showMessageDialog(null, "Destination key from shema doesn't exist as an attribute in a specific table! Unsuccessful validation!", "Error", 1);
+						nemaOb2=true;
+						sviKsuValid=false;
+						return;
+					}else { pronadjenOb=false;}
+				
+				}
+				if(nemaOb2==true) break;
+			}
+		}
+		if(sviKsuValid==true) {
+			boolean postoji=false;
+			for(String par: parenti.values()) {
+				if(!par.equals("")) {
+				for(String naslov:tabeleIObelezja.keySet()) {
+					if(naslov.equals(par)) {
+						postoji=true;
+					}
+				}
+				if(postoji==true) {postoji=false;}
+				else {
+					sviKsuValid=false; 
+					JOptionPane.showMessageDialog(null, "Parent from shema doesn't exist as a table title! Unsuccessful validation!", "Error", 1);
+					return;
+				}
+				}
+			}
+			if(sviKsuValid==true) {
+				for(String par: parenti.keySet()) {
+					if(par.equals(parenti.get(par))) {
+						sviKsuValid=false;
+						JOptionPane.showMessageDialog(null, "Parent name is the same name as a title of table! Unsuccessful validation!", "Error", 1);
+						return;
+					}
+				}
+			}
+			if(sviKsuValid==true) {
+				
+				if(koZove==true) {
+					JSON_Parser jp=new JSON_Parser();
+<<<<<<< .mine
+				Tabela[] nizTabela=jp.parse(opis.toString());
+				TableManipulation tm = new TableManipulation(nizTabela);
+				tm.manipulate();
+||||||| .r26
+=======
+					jp.parseTable(opis.toString());
+>>>>>>> .r28
+				}else {
+					JOptionPane.showMessageDialog(null, "Successful validation!", "Error", 1);
+				}
+			}
+			
+		}
+		
+		
+	}
+			
+		}
+		else {
+			String err[] = validator.validateAll().split("\n");
+			JOptionPane.showMessageDialog(null, "Unsuccessful validation!\n"+err[0], "Error", 1);
+				System.out.println("nece");
+		}
+		
+	
+	}
+
+}

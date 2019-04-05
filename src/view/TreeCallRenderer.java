@@ -1,0 +1,52 @@
+package view;
+
+import java.awt.Component;
+import java.awt.Image;
+
+import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
+import javax.swing.JTree;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeCellRenderer;
+
+import model.PaketModel;
+import model.TableModel;
+
+
+public class TreeCallRenderer extends DefaultTreeCellRenderer {
+
+	
+	public Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel, boolean expanded, boolean leaf,
+			int row, boolean hasFocus) {
+		super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
+
+		
+		DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
+		Object o = node.getUserObject();
+		
+
+		if(o instanceof TableModel) {
+			TableModel tm = (TableModel) o;
+			setText(tm.getTabela().getTitle());
+			setBorder(BorderFactory.createCompoundBorder());
+			ImageIcon ikonica = new ImageIcon("resources/table.png");
+			Image img = ikonica.getImage();
+			Image img2 = img.getScaledInstance(20, 20, java.awt.Image.SCALE_SMOOTH);
+			ikonica = new ImageIcon(img2);
+			setIcon(ikonica);
+		}else if(o instanceof PaketModel) {
+			PaketModel pm = (PaketModel) o;
+			setText(pm.getPaket().getImePaketa());
+	
+			ImageIcon ikonica = new ImageIcon("resources/paket.png");
+			Image img = ikonica.getImage();
+			Image img2 = img.getScaledInstance(20, 20, java.awt.Image.SCALE_SMOOTH);
+			ikonica = new ImageIcon(img2);
+			setIcon(ikonica);
+			setBorder(BorderFactory.createCompoundBorder());
+		}
+	
+	return this;
+	}
+
+}

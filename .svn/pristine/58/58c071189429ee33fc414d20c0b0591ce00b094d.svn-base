@@ -1,0 +1,10 @@
+package controller;
+
+public interface AbstractAction {
+	
+	public boolean addData();
+	public boolean removeData();
+	public boolean updateData();
+	
+
+}

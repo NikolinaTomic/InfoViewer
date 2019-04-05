@@ -1,0 +1,44 @@
+{
+  "attributes": [
+    {
+      "code": "DRZ",
+      "is_null": false,
+      "name": "Oznaka",
+      "is_mandatory": true,
+      "type": "string",
+      "MaxLength": 3
+    },
+    {
+      "code": "NZV",
+      "is_null": true,
+      "name": "Naziv",
+      "is_mandatory": true,
+      "type": "string",
+      "MaxLength": 128
+    },
+    {
+      "code": "GD",
+      "is_null": false,
+      "name": "Glavni grad",
+      "is_mandatory": false,
+      "type": "string",
+      "MaxLength": 5
+    }
+  ],
+  "title": "Drzava",
+  "relations": [
+    {
+      "sourceKey": "Oznaka",
+      "destinationTable": "Naseljeno Mesto",
+     
+      "title": "Glavni grad"
+    },
+    {
+      "sourceKey": "Glavni grad",
+      "destinationTable": "Naseljeno Mesto",
+      "destinationKey": "Postanski broj",
+      "title": "Pripada drzavi"
+    }
+  ],
+  "key": ["Oznaka"]
+}

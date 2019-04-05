@@ -1,0 +1,3283 @@
+package controller;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.LinkedList;
+
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextArea;
+import javax.swing.RowFilter;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
+
+import model.Tabela;
+
+public class Search extends JFrame{
+	private ArrayList<String>svikodovi = new ArrayList<>();
+	JPanel pap = new JPanel();
+	private LinkedList<JCheckBox>dugmici = new LinkedList<>();
+	private JRadioButton date = new JRadioButton("Date");
+	private JRadioButton numeric = new JRadioButton("Number");
+	private JRadioButton text = new JRadioButton("String");
+	private JRadioButton num = new JRadioButton("Numeric");
+	private JRadioButton bul = new JRadioButton("Boolean");
+	JLabel unesiOdDatum = new JLabel("From");
+	private JTextArea unesiOdDatumText = new JTextArea();
+	JLabel unesiDoDatum = new JLabel("To");
+	private JTextArea unesiDoDatumText = new JTextArea();
+	private ArrayList<String> naziviKolona = new ArrayList<>();
+	JPanel panelcic = new JPanel();
+	JScrollPane scrollPane = new JScrollPane();
+	JFrame frame = new JFrame("Search");
+	private JTextArea unos = new JTextArea();
+	private JTextArea unosFrom = new JTextArea();
+	private JTable table;
+	private Tabela tabela;
+    private JTable ta;
+	private int flag=0;
+	private JPanel pa1 = new JPanel();
+	private JPanel pa2 = new JPanel();
+	 private JTextArea unosTo = new JTextArea();
+	 public Search (Object[][] data, String[] names,String imeTabele,Tabela tabela) {
+		 this.tabela=tabela;
+		 if(imeTabele.contains(" ")) {
+	 			imeTabele=imeTabele.replace(" ", "_");
+	 		}	
+		 trazi(data,names,imeTabele);
+	 }
+	 
+	 
+	 
+	 
+	 
+	 public void trazi(Object[][] data, String[] names,String imeTabele) {
+		 for(int i=0;i<names.length;i++) {
+     			System.out.println(names[i].toString());
+     		
+     	}
+		
+		 
+		 JTable t = new JTable(data,names);
+		 JTable kopija = t;
+		 ta=t;
+		 TableRowSorter<TableModel> rowSorter
+         = new TableRowSorter<>(t.getModel());
+		 t.setRowSorter(rowSorter);
+		 JPanel glavniPanel = new JPanel(new BorderLayout());
+		 JButton add = new JButton("Add");
+		 add.setPreferredSize(new Dimension(65, 30));
+		 JButton remove = new JButton("Remove");
+		 remove.setPreferredSize(new Dimension(65, 30));
+		 JButton update = new JButton("Update");
+		 update.setPreferredSize(new Dimension(65, 30));
+		 JPanel operations = new JPanel();
+		 pap.setLayout(new BoxLayout(pap, BoxLayout.Y_AXIS));
+		 operations.setLayout(new BoxLayout(operations, BoxLayout.X_AXIS));
+			operations.setPreferredSize(new Dimension(230, 50));
+		 operations.add(add);
+		 operations.add(update);
+		 operations.add(remove);
+			glavniPanel.setBorder(BorderFactory.createLineBorder(Color.WHITE));
+			JPanel p1 = new JPanel(new BorderLayout());
+			JLabel labelaIzbor = new JLabel("Select search type");
+			p1.add(labelaIzbor, BorderLayout.NORTH);
+			JPanel p2 = new JPanel();
+			p2.setLayout(new BoxLayout(p2, BoxLayout.X_AXIS));
+			JPanel p3 = new JPanel(new BorderLayout());
+			JPanel srednjiDate = new JPanel(new BorderLayout());
+			JPanel p4 = new JPanel(new BorderLayout());
+			JPanel p5 = new JPanel(new BorderLayout());
+			
+			
+			p4.add(unesiOdDatum,BorderLayout.WEST);
+			p4.add(getUnesiOdDatumText(),BorderLayout.CENTER);
+			p5.add(unesiDoDatum,BorderLayout.WEST);
+			p5.add(getUnesiDoDatumText(),BorderLayout.CENTER);
+			srednjiDate.setLayout(new BoxLayout(srednjiDate, BoxLayout.Y_AXIS));
+			srednjiDate.add(p4);
+			srednjiDate.add(p5);
+			
+			JLabel unesi = new JLabel("Type search filter:  ");
+		
+			JPanel srednjiText = new JPanel(new BorderLayout());
+			JPanel srednjiNum = new JPanel();
+			JRadioButton istina = new JRadioButton("True");
+			JRadioButton laz = new JRadioButton("False");
+			ButtonGroup istinalaz = new ButtonGroup();
+			istinalaz.add(istina);
+			istinalaz.add(laz);
+			JPanel srednjiBool = new JPanel(new BorderLayout());
+			srednjiBool.add(istina,BorderLayout.WEST);
+			srednjiBool.add(laz,BorderLayout.CENTER);
+			Toolkit toolkit = Toolkit.getDefaultToolkit();
+			Dimension screenSize = toolkit.getScreenSize();
+			JPanel Sr1 = new JPanel(new BorderLayout());
+			JPanel Sr2 = new JPanel(new BorderLayout());
+			JLabel from = new JLabel("From  ");
+			from.setPreferredSize(new Dimension(40, 7));
+			JLabel to = new JLabel("To  ");
+			to.setPreferredSize(new Dimension(40, 7));
+			
+
+			 getUnesiOdDatumText().addKeyListener(new KeyAdapter() {
+				    public void keyTyped(KeyEvent e) {
+				      char c = e.getKeyChar();
+				      if (!((c >= '0') && (c <= '9') || (c == '-') ||
+				         (c == KeyEvent.VK_BACK_SPACE) ||
+				         (c == KeyEvent.VK_DELETE))) {
+				       toolkit.beep();
+				        e.consume();
+				      }
+				    }
+				  });
+			 
+
+			getUnesiDoDatumText().addKeyListener(new KeyAdapter() {
+				    public void keyTyped(KeyEvent e) {
+				      char c = e.getKeyChar();
+				      if (!((c >= '0') && (c <= '9') || (c == '-') ||
+				         (c == KeyEvent.VK_BACK_SPACE) ||
+				         (c == KeyEvent.VK_DELETE))) {
+				       toolkit.beep();
+				        e.consume();
+				      }
+				    }
+				  });
+			
+			
+			 getUnosFrom().addKeyListener(new KeyAdapter() {
+				    public void keyTyped(KeyEvent e) {
+				      char c = e.getKeyChar();
+				      if (!((c >= '0') && (c <= '9') ||
+				         (c == KeyEvent.VK_BACK_SPACE) ||
+				         (c == KeyEvent.VK_DELETE))) {
+				       toolkit.beep();
+				        e.consume();
+				      }
+				    }
+				  });
+			 
+
+			getUnosTo().addKeyListener(new KeyAdapter() {
+				    public void keyTyped(KeyEvent e) {
+				      char c = e.getKeyChar();
+				      if (!((c >= '0') && (c <= '9') ||
+				         (c == KeyEvent.VK_BACK_SPACE) ||
+				         (c == KeyEvent.VK_DELETE))) {
+				       toolkit.beep();
+				        e.consume();
+				      }
+				    }
+				  });
+			
+			Sr1.add(from,BorderLayout.WEST);
+			Sr1.add(getUnosFrom(),BorderLayout.CENTER);
+			Sr2.add(to,BorderLayout.WEST);
+			Sr2.add(getUnosTo(),BorderLayout.CENTER);
+			
+			//srednjiNum.add(Sr1, BorderLayout.WEST);
+		    // srednjiNum.add(Sr2, BorderLayout.CENTER);
+		srednjiNum.setLayout(new BoxLayout(srednjiNum, BoxLayout.Y_AXIS));
+		srednjiNum.add(Sr1);
+		srednjiNum.add(Sr2);
+			
+		
+		getNum().addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				// TODO Auto-generated method stub
+			dugmici.clear();
+			int a =0;
+			svikodovi.clear();
+			istinalaz.clearSelection();
+			for(int j=0;j<tabela.getAttributes().size();j++) {
+			svikodovi.add(tabela.getAttributes().get(j).getCode());
+			}
+				glavniPanel.removeAll();
+				  JPanel pan = new JPanel();
+                   ta=t;
+					pan.setLayout(new BoxLayout(pan, BoxLayout.Y_AXIS));
+					for(int i=0;i<t.getColumnCount();i++) {
+						for(int j=0;j<tabela.getAttributes().size();j++) {
+							
+							if((t.getColumnName(i).equals(tabela.getAttributes().get(j).getName())) && tabela.getAttributes().get(j).getType().equals("number")) {
+						a++;
+						JCheckBox l = new JCheckBox(t.getColumnName(i));
+						l.setName(t.getColumnName(i));
+					   l.setSelected(false);
+						l.addActionListener(new  ActionListener() {
+							
+							@Override
+							public void actionPerformed(ActionEvent e) {
+					
+								// TODO Auto-generated method stub
+								if(l.isSelected()) {
+									for(int i=0;i<dugmici.size();i++) {
+										if(dugmici.get(i).getName().equals(l.getName())) {
+											flag=1;
+											break;
+										}
+									}
+									if(flag!=1) {
+										dugmici.add(l);
+									}
+									
+								}
+								else if(!l.isSelected()) {
+									
+									for(int i=0;i<dugmici.size();i++) {
+										if(dugmici.get(i).getName().equals(l.getName())) {
+											dugmici.remove(i);
+										}
+									}
+									
+								}
+								for(int i=0;i<dugmici.size();i++) {
+									System.out.println(dugmici.get(i).getName());
+								}
+							}
+						});
+						pan.add(l);
+					}
+				 glavniPanel.add(p3,BorderLayout.NORTH);
+				 glavniPanel.add(pan,BorderLayout.CENTER);
+				 if(a!=0)
+				 glavniPanel.add(srednjiNum,BorderLayout.SOUTH);
+				glavniPanel.revalidate();
+				glavniPanel.repaint();
+				
+			}
+					}
+					
+					try {
+						Connection conn = DriverManager.getConnection("jdbc:jtds:sqlserver://147.91.175.155/psw-2018-tim2-4","psw-2018-tim2-4","tim2-413090834");
+						String query = "select * from "+imeTabele + ";";
+						System.out.println(query);
+						
+						
+						PreparedStatement pstmt = conn.prepareStatement(query);
+			            ResultSet rset = pstmt.executeQuery();
+						
+						int brojac=0;
+						while(rset.next()) {
+							brojac++;
+						}
+						rset = pstmt.executeQuery();
+						//System.out.println(brojac);
+						//provera da li ima podataka u resultset-u
+						if(!rset.isBeforeFirst()) {
+							System.out.println("Nema podataka");
+						}
+						
+						int brPar=t.getColumnCount();
+						Object[][] data=new Object[brojac][brPar];
+
+						int brojac2=0;
+						while(rset.next()) {
+							for(int i=0;i<brPar;i++) {
+								data[brojac2][i]=rset.getString(i+1);
+							}
+							brojac2++;
+						}
+						
+						rset.close();
+						pstmt.close();
+						
+						 ta = new JTable(data, names);
+						  p2.add(text);
+							 p2.add(getNum());
+							
+							 p2.add(getBul());
+							 p2.add(getDate());
+							 p3.add(p1, BorderLayout.NORTH);
+							 p3.add(p2,BorderLayout.SOUTH);
+							 glavniPanel.add(p3,BorderLayout.NORTH);
+
+
+							
+							
+								getPa2().removeAll();
+								getPa2().add(glavniPanel);
+								getPa2().revalidate();
+								getPa2().repaint();
+							panelcic.removeAll();
+							panelcic.setPreferredSize(new Dimension(800, 800));
+							panelcic.setLayout(new BorderLayout());
+							panelcic.add(getPa2(),BorderLayout.NORTH);
+						
+							
+						
+					    	frame.setPreferredSize(new Dimension(800, 800));
+					    	
+
+					    
+					    	scrollPane.setViewportView(ta);
+					    	scrollPane.revalidate();
+					    	scrollPane.repaint();
+					    	
+					    	panelcic.add(scrollPane,BorderLayout.CENTER);
+					    	panelcic.revalidate();
+					    	panelcic.repaint();
+					      //	frame.removeAll();
+					    	pap.removeAll();
+					    	pap.add(operations);
+					    	pap.add(panelcic);
+					    	pap.revalidate();
+					    	pap.repaint();
+					    	frame.add(pap);
+							frame.revalidate();
+							frame.repaint();
+						//	return;
+						
+						
+						} catch (SQLException ee) {
+							// TODO Auto-generated catch block
+							ee.printStackTrace();
+						}
+			}});
+		
+		
+		
+getDate().addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				// TODO Auto-generated method stub
+			dugmici.clear();
+			istinalaz.clearSelection();
+			svikodovi.clear();
+			int a =0;
+			for(int j=0;j<tabela.getAttributes().size();j++) {
+			svikodovi.add(tabela.getAttributes().get(j).getCode());
+			}
+			ta=t;
+				glavniPanel.removeAll();
+				  JPanel pan = new JPanel();
+          
+					pan.setLayout(new BoxLayout(pan, BoxLayout.Y_AXIS));
+					for(int i=0;i<t.getColumnCount();i++) {
+						for(int j=0;j<tabela.getAttributes().size();j++) {
+						
+							if((t.getColumnName(i).equals(tabela.getAttributes().get(j).getName())) && tabela.getAttributes().get(j).getType().equals("string")) {
+				        a++;
+						JCheckBox l = new JCheckBox(t.getColumnName(i));
+						l.setName(t.getColumnName(i));
+					    l.setSelected(false);
+						l.addActionListener(new  ActionListener() {
+							
+							@Override
+							public void actionPerformed(ActionEvent e) {
+						
+								// TODO Auto-generated method stub
+								if(l.isSelected()) {
+									for(int i=0;i<dugmici.size();i++) {
+										if(dugmici.get(i).getName().equals(l.getName())) {
+											flag=1;
+											break;
+										}
+									}
+									if(flag!=1) {
+										dugmici.add(l);
+									}
+									
+								}
+								else if(!l.isSelected()) {
+									
+									for(int i=0;i<dugmici.size();i++) {
+										if(dugmici.get(i).getName().equals(l.getName())) {
+											dugmici.remove(i);
+										}
+									}
+									
+								}
+								for(int i=0;i<dugmici.size();i++) {
+									System.out.println(dugmici.get(i).getName());
+								}
+							}
+						});
+						pan.add(l);
+							
+					}
+				 glavniPanel.add(p3,BorderLayout.NORTH);
+				 glavniPanel.add(pan,BorderLayout.CENTER);
+				 if(a!=0)
+				 glavniPanel.add(srednjiDate,BorderLayout.SOUTH);
+				glavniPanel.revalidate();
+				glavniPanel.repaint();
+				
+			}}
+					try {
+						Connection conn = DriverManager.getConnection("jdbc:jtds:sqlserver://147.91.175.155/psw-2018-tim2-4","psw-2018-tim2-4","tim2-413090834");
+						String query = "select * from "+imeTabele + ";";
+						System.out.println(query);
+						
+						
+						PreparedStatement pstmt = conn.prepareStatement(query);
+			            ResultSet rset = pstmt.executeQuery();
+						
+						int brojac=0;
+						while(rset.next()) {
+							brojac++;
+						}
+						rset = pstmt.executeQuery();
+						//System.out.println(brojac);
+						//provera da li ima podataka u resultset-u
+						if(!rset.isBeforeFirst()) {
+							System.out.println("Nema podataka");
+						}
+						
+						int brPar=t.getColumnCount();
+						Object[][] data=new Object[brojac][brPar];
+
+						int brojac2=0;
+						while(rset.next()) {
+							for(int i=0;i<brPar;i++) {
+								data[brojac2][i]=rset.getString(i+1);
+							}
+							brojac2++;
+						}
+						
+						rset.close();
+						pstmt.close();
+						
+						 ta = new JTable(data, names);
+						  p2.add(text);
+							 p2.add(getNum());
+							
+							 p2.add(getBul());
+							 p2.add(getDate());
+							 p3.add(p1, BorderLayout.NORTH);
+							 p3.add(p2,BorderLayout.SOUTH);
+							 glavniPanel.add(p3,BorderLayout.NORTH);
+
+
+							
+							
+								getPa2().removeAll();
+								getPa2().add(glavniPanel);
+								getPa2().revalidate();
+								getPa2().repaint();
+							panelcic.removeAll();
+							panelcic.setPreferredSize(new Dimension(800, 800));
+							panelcic.setLayout(new BorderLayout());
+							panelcic.add(getPa2(),BorderLayout.NORTH);
+						
+							
+						
+					    	frame.setPreferredSize(new Dimension(800, 800));
+					    	
+
+					    
+					    	scrollPane.setViewportView(ta);
+					    	scrollPane.revalidate();
+					    	scrollPane.repaint();
+					    	
+					    	panelcic.add(scrollPane,BorderLayout.CENTER);
+					    	panelcic.revalidate();
+					    	panelcic.repaint();
+					      //	frame.removeAll();
+					    	pap.removeAll();
+					    	pap.add(operations);
+					    	pap.add(panelcic);
+					    	pap.revalidate();
+					    	pap.repaint();
+					    	frame.add(pap);
+							frame.revalidate();
+							frame.repaint();
+						//	return;
+						
+						
+						} catch (SQLException ee) {
+							// TODO Auto-generated catch block
+							ee.printStackTrace();
+						}
+					getUnos().setText("");
+					getUnos().revalidate();
+					getUnos().repaint();
+					getUnosFrom().setText("");
+					getUnosFrom().revalidate();
+					getUnosFrom().repaint();
+					getUnosTo().setText("");
+					getUnosTo().revalidate();
+					getUnosTo().repaint();
+					getUnesiOdDatumText().setText("");
+					getUnesiOdDatumText().revalidate();
+					getUnesiOdDatumText().repaint();
+					getUnesiDoDatumText().setText("");
+					getUnesiDoDatumText().revalidate();
+					getUnesiDoDatumText().repaint();
+					}
+		});
+		
+		
+		
+			
+			
+			getText().addActionListener(new ActionListener() {
+				
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					// TODO Auto-generated method stub
+				dugmici.clear();
+				int a=0;
+				istinalaz.clearSelection();
+				svikodovi.clear();
+				for(int j=0;j<tabela.getAttributes().size();j++) {
+				svikodovi.add(tabela.getAttributes().get(j).getCode());
+				
+				}
+					glavniPanel.removeAll();
+					  JPanel pan = new JPanel();
+                       ta=t;
+						pan.setLayout(new BoxLayout(pan, BoxLayout.Y_AXIS));
+						for(int i=0;i<t.getColumnCount();i++) {
+							for(int j=0;j<tabela.getAttributes().size();j++) {
+								if((t.getColumnName(i).equals(tabela.getAttributes().get(j).getName())) && tabela.getAttributes().get(j).getType().equals("string")) {
+					
+							JCheckBox l = new JCheckBox(t.getColumnName(i));
+							l.setName(t.getColumnName(i));
+							a++;
+							l.setSelected(false);
+						    l.addActionListener(new  ActionListener() {
+								
+								@Override
+								public void actionPerformed(ActionEvent e) {
+								
+									// TODO Auto-generated method stub
+									if(l.isSelected()) {
+										for(int i=0;i<dugmici.size();i++) {
+											if(dugmici.get(i).getName().equals(l.getName())) {
+												flag=1;
+												break;
+											}
+										}
+										if(flag!=1) {
+											dugmici.add(l);
+										}
+										
+									}
+									else if(!l.isSelected()) {
+										
+										for(int i=0;i<dugmici.size();i++) {
+											if(dugmici.get(i).getName().equals(l.getName())) {
+												dugmici.remove(i);
+											}
+										}
+										
+									}
+									for(int i=0;i<dugmici.size();i++) {
+										System.out.println(dugmici.get(i).getName());
+									}
+								}
+						    });
+							pan.add(l);
+								
+						}
+								srednjiText.add(unesi,BorderLayout.WEST);
+								srednjiText.add(getUnos(),BorderLayout.CENTER);
+					 glavniPanel.add(p3,BorderLayout.NORTH);
+					 glavniPanel.add(pan,BorderLayout.CENTER);
+					 if(a!=0) 
+					 glavniPanel.add(srednjiText,BorderLayout.SOUTH);
+					glavniPanel.revalidate();
+					glavniPanel.repaint();
+					
+					 
+					 
+					 
+					 
+					 
+					 
+					 
+					 }}
+						try {
+						Connection conn = DriverManager.getConnection("jdbc:jtds:sqlserver://147.91.175.155/psw-2018-tim2-4","psw-2018-tim2-4","tim2-413090834");
+						String query = "select * from "+imeTabele + ";";
+						System.out.println(query);
+						
+						
+						PreparedStatement pstmt = conn.prepareStatement(query);
+			            ResultSet rset = pstmt.executeQuery();
+						
+						int brojac=0;
+						while(rset.next()) {
+							brojac++;
+						}
+						rset = pstmt.executeQuery();
+						//System.out.println(brojac);
+						//provera da li ima podataka u resultset-u
+						if(!rset.isBeforeFirst()) {
+							System.out.println("Nema podataka");
+						}
+						
+						int brPar=t.getColumnCount();
+						Object[][] data=new Object[brojac][brPar];
+
+						int brojac2=0;
+						while(rset.next()) {
+							for(int i=0;i<brPar;i++) {
+								data[brojac2][i]=rset.getString(i+1);
+							}
+							brojac2++;
+						}
+						
+						rset.close();
+						pstmt.close();
+						
+						 ta = new JTable(data, names);
+						  p2.add(text);
+							 p2.add(getNum());
+							
+							 p2.add(getBul());
+							 p2.add(getDate());
+							 p3.add(p1, BorderLayout.NORTH);
+							 p3.add(p2,BorderLayout.SOUTH);
+							 glavniPanel.add(p3,BorderLayout.NORTH);
+
+
+							
+							
+								getPa2().removeAll();
+								getPa2().add(glavniPanel);
+								getPa2().revalidate();
+								getPa2().repaint();
+							panelcic.removeAll();
+							panelcic.setPreferredSize(new Dimension(800, 800));
+							panelcic.setLayout(new BorderLayout());
+							panelcic.add(getPa2(),BorderLayout.NORTH);
+						
+							
+						
+					    	frame.setPreferredSize(new Dimension(800, 800));
+					    	
+
+					    
+					    	scrollPane.setViewportView(ta);
+					    	scrollPane.revalidate();
+					    	scrollPane.repaint();
+					    	
+					    	panelcic.add(scrollPane,BorderLayout.CENTER);
+					    	panelcic.revalidate();
+					    	panelcic.repaint();
+					      //	frame.removeAll();
+					    	pap.removeAll();
+					    	pap.add(operations);
+					    	pap.add(panelcic);
+					    	pap.revalidate();
+					    	pap.repaint();
+					    	frame.add(pap);
+							frame.revalidate();
+							frame.repaint();
+						//	return;
+						
+						
+						} catch (SQLException ee) {
+							// TODO Auto-generated catch block
+							ee.printStackTrace();
+						}
+
+						
+						
+						getUnos().setText("");
+						getUnos().revalidate();
+						getUnos().repaint();
+						getUnosFrom().setText("");
+						getUnosFrom().revalidate();
+						getUnosFrom().repaint();
+						getUnosTo().setText("");
+						getUnosTo().revalidate();
+						getUnosTo().repaint();
+						getUnesiOdDatumText().setText("");
+						getUnesiOdDatumText().revalidate();
+						getUnesiOdDatumText().repaint();
+						getUnesiDoDatumText().setText("");
+						getUnesiDoDatumText().revalidate();
+						getUnesiDoDatumText().repaint();		
+				}
+			});
+		 
+			
+	
+			unos.getDocument().addDocumentListener(new DocumentListener(){
+                
+				
+				
+	            @Override
+	            public void insertUpdate(DocumentEvent e) {
+	   //         	naziviKolona.clear();
+	        /*        String text = unos.getText();
+
+	                if (text.trim().length() == 0) {
+	                    rowSorter.setRowFilter(null);
+	                } else {
+	                    rowSorter.setRowFilter(RowFilter.regexFilter("(?i)" + text));
+	                }
+	                
+	                
+	               
+	          */  
+	            	for(int i=0;i<dugmici.size();i++) {
+	            		System.out.println("cekirao " + dugmici.get(i).getName());
+	            	}
+	            	
+	            	try {
+	            		naziviKolona.clear();
+	            		
+	            		for(int i=0;i<dugmici.size();i++) {
+	            			for(int j=0;j<tabela.getAttributes().size();j++) {
+	            				if(dugmici.get(i).getName().equals(tabela.getAttributes().get(j).getName())) {
+	            					naziviKolona.add(tabela.getAttributes().get(j).getCode());
+	            					System.out.println("CODE "+tabela.getAttributes().get(j).getCode());
+	            					break;
+	            				}
+	            			}
+	            		}
+	            		
+	            		
+	            		
+	            		String nov="";
+	            		int pozicija=0;
+						String kolone = "";
+						if(naziviKolona.size()!=0) {
+							for(int i=0;i<naziviKolona.size();i++) {
+								kolone+=naziviKolona.get(i)+" like "+"\'%"+unos.getText()+"%\'" +" and ";
+							}
+							pozicija=kolone.lastIndexOf("and");
+							System.out.println(pozicija+"na or");
+							nov = kolone.substring(0, pozicija-1);
+							
+						}
+						else {
+							for(int i=0;i<svikodovi.size();i++) {
+								for(int j=0;j<tabela.getAttributes().size();j++) {
+									if((svikodovi.get(i).equals(tabela.getAttributes().get(j).getCode()))  && (tabela.getAttributes().get(j).getType().equals("string"))){
+								kolone+=svikodovi.get(i)+" like "+"\'%"+unos.getText()+"%\'" + " or ";
+							}
+								}
+							}
+							pozicija=kolone.lastIndexOf("or");
+							System.out.println(pozicija+"na or");
+							nov = kolone.substring(0, pozicija-1);
+							
+							
+						}
+						Connection conn = DriverManager.getConnection("jdbc:jtds:sqlserver://147.91.175.155/psw-2018-tim2-4","psw-2018-tim2-4","tim2-413090834");
+					String query = "select * from "+imeTabele + " where "  + nov+";";
+					System.out.println(query);
+					
+					
+					PreparedStatement pstmt = conn.prepareStatement(query);
+	                ResultSet rset = pstmt.executeQuery();
+					
+					int brojac=0;
+					while(rset.next()) {
+						brojac++;
+					}
+					rset = pstmt.executeQuery();
+					//System.out.println(brojac);
+					//provera da li ima podataka u resultset-u
+					if(!rset.isBeforeFirst()) {
+						System.out.println("Nema podataka");
+					}
+					
+					int brPar=t.getColumnCount();
+					Object[][] data=new Object[brojac][brPar];
+		
+					int brojac2=0;
+					while(rset.next()) {
+						for(int i=0;i<brPar;i++) {
+							data[brojac2][i]=rset.getString(i+1);
+						}
+						brojac2++;
+					}
+					
+					rset.close();
+					pstmt.close();
+					
+					 ta = new JTable(data, names);
+					  p2.add(text);
+						 p2.add(getNum());
+						
+						 p2.add(getBul());
+						 p2.add(getDate());
+						 p3.add(p1, BorderLayout.NORTH);
+						 p3.add(p2,BorderLayout.SOUTH);
+						 glavniPanel.add(p3,BorderLayout.NORTH);
+
+
+						
+						
+							getPa2().removeAll();
+							getPa2().add(glavniPanel);
+							getPa2().revalidate();
+							getPa2().repaint();
+						panelcic.removeAll();
+						panelcic.setPreferredSize(new Dimension(800, 800));
+						panelcic.setLayout(new BorderLayout());
+						panelcic.add(getPa2(),BorderLayout.NORTH);
+					
+						
+					
+				    	frame.setPreferredSize(new Dimension(800, 800));
+				    	
+
+				    
+				    	scrollPane.setViewportView(ta);
+				    	scrollPane.revalidate();
+				    	scrollPane.repaint();
+				    	
+				    	panelcic.add(scrollPane,BorderLayout.CENTER);
+				    	panelcic.revalidate();
+				    	panelcic.repaint();
+				      //	frame.removeAll();
+				    	pap.removeAll();
+				    	pap.add(operations);
+				    	pap.add(panelcic);
+				    	pap.revalidate();
+				    	pap.repaint();
+				    	frame.add(pap);
+						frame.revalidate();
+						frame.repaint();
+					//	return;
+					
+					
+					} catch (SQLException ee) {
+						// TODO Auto-generated catch block
+						ee.printStackTrace();
+					}
+	            
+	            }
+
+	            @Override
+	            public void removeUpdate(DocumentEvent e) {
+	   //          naziviKolona.clear();
+	            	/*  String text = unos.getText();
+
+	                if (text.trim().length() == 0) {
+	                    rowSorter.setRowFilter(null);
+	                } else {
+	                    rowSorter.setRowFilter(RowFilter.regexFilter("(?i)" + text));
+	                }
+	         */   
+	            	
+	            
+try {
+	            		
+	naziviKolona.clear();
+	            		for(int i=0;i<dugmici.size();i++) {
+	            			for(int j=0;j<tabela.getAttributes().size();j++) {
+	            				if(dugmici.get(i).getName().equals(tabela.getAttributes().get(j).getName())) {
+	            					naziviKolona.add(tabela.getAttributes().get(j).getCode());
+	            					System.out.println("CODE "+tabela.getAttributes().get(j).getCode());
+	            					break;
+	            				}
+	            			}
+	            		}
+	            		
+	            		
+	            		
+	            		String nov="";
+	            		int pozicija=0;
+						String kolone = "";
+						if(naziviKolona.size()!=0) {
+							for(int i=0;i<naziviKolona.size();i++) {
+								kolone+=naziviKolona.get(i)+" like "+"\'%"+unos.getText()+"%\'" +" and ";
+							}
+							pozicija=kolone.lastIndexOf("and");
+							System.out.println(pozicija+"na or");
+							nov = kolone.substring(0, pozicija-1);
+							
+						}
+						else {
+							for(int i=0;i<svikodovi.size();i++) {
+								for(int j=0;j<tabela.getAttributes().size();j++) {
+									if((svikodovi.get(i).equals(tabela.getAttributes().get(j).getCode()))  && (tabela.getAttributes().get(j).getType().equals("string"))){
+								kolone+=svikodovi.get(i)+" like "+"\'%"+unos.getText()+"%\'" + " or ";
+							}
+								}
+							}
+							pozicija=kolone.lastIndexOf("or");
+							System.out.println(pozicija+"na or");
+							nov = kolone.substring(0, pozicija-1);
+							
+							
+						}
+						Connection conn = DriverManager.getConnection("jdbc:jtds:sqlserver://147.91.175.155/psw-2018-tim2-4","psw-2018-tim2-4","tim2-413090834");
+					String query = "select * from "+imeTabele + " where "  + nov+";";
+					System.out.println(query);
+					
+					
+					PreparedStatement pstmt = conn.prepareStatement(query);
+	                ResultSet rset = pstmt.executeQuery();
+					
+					int brojac=0;
+					while(rset.next()) {
+						brojac++;
+					}
+					rset = pstmt.executeQuery();
+					//System.out.println(brojac);
+					//provera da li ima podataka u resultset-u
+					if(!rset.isBeforeFirst()) {
+						System.out.println("Nema podataka");
+					}
+					
+					int brPar=t.getColumnCount();
+					Object[][] data=new Object[brojac][brPar];
+		
+					int brojac2=0;
+					while(rset.next()) {
+						for(int i=0;i<brPar;i++) {
+							data[brojac2][i]=rset.getString(i+1);
+						}
+						brojac2++;
+					}
+					
+					rset.close();
+					pstmt.close();
+					
+					 ta = new JTable(data, names);
+					  p2.add(text);
+						 p2.add(getNum());
+						
+						 p2.add(getBul());
+						 p2.add(getDate());
+						 p3.add(p1, BorderLayout.NORTH);
+						 p3.add(p2,BorderLayout.SOUTH);
+						 glavniPanel.add(p3,BorderLayout.NORTH);
+
+
+						
+						
+							getPa2().removeAll();
+							getPa2().add(glavniPanel);
+							getPa2().revalidate();
+							getPa2().repaint();
+						panelcic.removeAll();
+						panelcic.setPreferredSize(new Dimension(800, 800));
+						panelcic.setLayout(new BorderLayout());
+						panelcic.add(getPa2(),BorderLayout.NORTH);
+					
+						
+					
+				    	frame.setPreferredSize(new Dimension(800, 800));
+				    	
+
+				    
+				    	scrollPane.setViewportView(ta);
+				    	scrollPane.revalidate();
+				    	scrollPane.repaint();
+				    	
+				    	panelcic.add(scrollPane,BorderLayout.CENTER);
+				    	panelcic.revalidate();
+				    	panelcic.repaint();
+				      //	frame.removeAll();
+				    	pap.removeAll();
+				    	pap.add(operations);
+				    	pap.add(panelcic);
+				    	pap.revalidate();
+				    	pap.repaint();
+				    	frame.add(pap);
+						frame.revalidate();
+						frame.repaint();
+					//	return;
+					
+					
+					} catch (SQLException ee) {
+						// TODO Auto-generated catch block
+						ee.printStackTrace();
+					}
+	            
+	            
+	            
+	            }
+
+	            @Override
+	            public void changedUpdate(DocumentEvent e) {
+	                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	            }
+
+			
+
+	        });
+			
+		
+		
+			
+			
+			
+	unosFrom.getDocument().addDocumentListener(new DocumentListener(){
+                
+				
+				
+	            @Override
+	            public void insertUpdate(DocumentEvent e) {
+	   //         	naziviKolona.clear();
+	        /*        String text = unos.getText();
+
+	                if (text.trim().length() == 0) {
+	                    rowSorter.setRowFilter(null);
+	                } else {
+	                    rowSorter.setRowFilter(RowFilter.regexFilter("(?i)" + text));
+	                }
+	                
+	                
+	               
+	          */  
+	            	for(int i=0;i<dugmici.size();i++) {
+	            		System.out.println("cekirao " + dugmici.get(i).getName());
+	            	}
+	            	
+	            	try {
+	            		naziviKolona.clear();
+	            		
+	            		for(int i=0;i<dugmici.size();i++) {
+	            			for(int j=0;j<tabela.getAttributes().size();j++) {
+	            				if(dugmici.get(i).getName().equals(tabela.getAttributes().get(j).getName())) {
+	            					naziviKolona.add(tabela.getAttributes().get(j).getCode());
+	            					System.out.println("CODE "+tabela.getAttributes().get(j).getCode());
+	            					break;
+	            				}
+	            			}
+	            		}
+	            		
+	            		
+	            		
+	            		String nov="";
+	            		int pozicija=0;
+						String kolone = "";
+						 if(unosFrom.getText().equals("") && !(unosTo.getText().equals(""))) {
+			     	        	
+								if(naziviKolona.size()!=0) {
+									for(int i=0;i<naziviKolona.size();i++) {
+										kolone+=naziviKolona.get(i)+" <= "+unosTo.getText() +" and ";
+									}
+									pozicija=kolone.lastIndexOf("and");
+									System.out.println(pozicija+"na or");
+									nov = kolone.substring(0, pozicija-1);
+									
+								}
+								else {
+									for(int i=0;i<svikodovi.size();i++) {
+										for(int j=0;j<tabela.getAttributes().size();j++) {
+											if((svikodovi.get(i).equals(tabela.getAttributes().get(j).getCode()))  && (tabela.getAttributes().get(j).getType().equals("number"))){
+										kolone+=svikodovi.get(i)+" <= "+unosTo.getText() + " or ";
+									}
+										}
+									}
+									pozicija=kolone.lastIndexOf("or");
+									System.out.println(pozicija+"na or");
+									nov = kolone.substring(0, pozicija-1);
+									
+									
+								}
+								}
+								
+								 if(unosFrom.getText().equals("") && (unosTo.getText().equals(""))) {
+	   			                   nov = "select * from" + imeTabele +";";
+				     	        }
+
+						
+						if(unosTo.getText().equals("") && !(unosFrom.getText().equals(""))) {
+						
+						if(naziviKolona.size()!=0) {
+							for(int i=0;i<naziviKolona.size();i++) {
+							kolone+=naziviKolona.get(i)+" >= "+ unosFrom.getText() +" and ";
+							}
+							
+							pozicija=kolone.lastIndexOf("and");
+							System.out.println(pozicija+"na or");
+							nov = kolone.substring(0, pozicija-1);
+							
+						}
+						else {
+							for(int i=0;i<svikodovi.size();i++) {
+								for(int j=0;j<tabela.getAttributes().size();j++) {
+									if((svikodovi.get(i).equals(tabela.getAttributes().get(j).getCode()))  && (tabela.getAttributes().get(j).getType().equals("number"))){
+								kolone+=svikodovi.get(i)+" >= "+ unosFrom.getText() + " or ";
+							}
+								}
+							}
+							pozicija=kolone.lastIndexOf("or");
+							System.out.println(pozicija+"na or");
+							nov = kolone.substring(0, pozicija-1);
+							
+							
+						}
+						}
+						
+						if(!(unosTo.getText().equals("")) && !(unosFrom.getText().equals(""))) {
+							
+							
+							if(naziviKolona.size()!=0) {
+								for(int i=0;i<naziviKolona.size();i++) {
+									kolone+=naziviKolona.get(i)+" between "+ unosFrom.getText()+" and "+ unosTo.getText() +" and ";
+								}
+								pozicija=kolone.lastIndexOf("and");
+								System.out.println(pozicija+"na or");
+								nov = kolone.substring(0, pozicija-1);
+								
+							}
+							else {
+								for(int i=0;i<svikodovi.size();i++) {
+									for(int j=0;j<tabela.getAttributes().size();j++) {
+										if((svikodovi.get(i).equals(tabela.getAttributes().get(j).getCode()))  && (tabela.getAttributes().get(j).getType().equals("number"))){
+									kolone+=svikodovi.get(i)+" between "+ unosFrom.getText()+" and "+ unosTo.getText() +" or ";
+								}
+									}
+								}
+								pozicija=kolone.lastIndexOf("or");
+								System.out.println(pozicija+"na or");
+								nov = kolone.substring(0, pozicija-1);
+								
+								
+							}
+							
+							
+							
+						}
+						
+						Connection conn = DriverManager.getConnection("jdbc:jtds:sqlserver://147.91.175.155/psw-2018-tim2-4","psw-2018-tim2-4","tim2-413090834");
+					String query = "select * from "+imeTabele + " where "  + nov+";";
+					System.out.println(query);
+					 if(unosFrom.getText().equals("") && (unosTo.getText().equals(""))) {
+			                   query = "select * from " + imeTabele +";";
+		     	        }
+					
+					PreparedStatement pstmt = conn.prepareStatement(query);
+	                ResultSet rset = pstmt.executeQuery();
+					
+					int brojac=0;
+					while(rset.next()) {
+						brojac++;
+					}
+					rset = pstmt.executeQuery();
+					//System.out.println(brojac);
+					//provera da li ima podataka u resultset-u
+					if(!rset.isBeforeFirst()) {
+						System.out.println("Nema podataka");
+					}
+					
+					int brPar=t.getColumnCount();
+					Object[][] data=new Object[brojac][brPar];
+		
+					int brojac2=0;
+					while(rset.next()) {
+						for(int i=0;i<brPar;i++) {
+							data[brojac2][i]=rset.getString(i+1);
+						}
+						brojac2++;
+					}
+					
+					rset.close();
+					pstmt.close();
+					
+					 ta = new JTable(data, names);
+					  p2.add(text);
+						 p2.add(getNum());
+						
+						 p2.add(getBul());
+						 p2.add(getDate());
+						 p3.add(p1, BorderLayout.NORTH);
+						 p3.add(p2,BorderLayout.SOUTH);
+						 glavniPanel.add(p3,BorderLayout.NORTH);
+
+
+						
+						
+							getPa2().removeAll();
+							getPa2().add(glavniPanel);
+							getPa2().revalidate();
+							getPa2().repaint();
+						panelcic.removeAll();
+						panelcic.setPreferredSize(new Dimension(800, 800));
+						panelcic.setLayout(new BorderLayout());
+						panelcic.add(getPa2(),BorderLayout.NORTH);
+					
+						
+					
+				    	frame.setPreferredSize(new Dimension(800, 800));
+				    	
+
+				    
+				    	scrollPane.setViewportView(ta);
+				    	scrollPane.revalidate();
+				    	scrollPane.repaint();
+				    	
+				    	panelcic.add(scrollPane,BorderLayout.CENTER);
+				    	panelcic.revalidate();
+				    	panelcic.repaint();
+				      //	frame.removeAll();
+				    	pap.removeAll();
+				    	pap.add(operations);
+				    	pap.add(panelcic);
+				    	pap.revalidate();
+				    	pap.repaint();
+				    	frame.add(pap);
+						frame.revalidate();
+						frame.repaint();
+					//	return;
+					
+					
+					} catch (SQLException ee) {
+						// TODO Auto-generated catch block
+						ee.printStackTrace();
+					}
+	            
+	            }
+
+	            @Override
+	            public void removeUpdate(DocumentEvent e) {
+	  
+	          
+		            	for(int i=0;i<dugmici.size();i++) {
+		            		System.out.println("cekirao " + dugmici.get(i).getName());
+		            	}
+		            	
+		            	try {
+		            		naziviKolona.clear();
+		            		
+		            		for(int i=0;i<dugmici.size();i++) {
+		            			for(int j=0;j<tabela.getAttributes().size();j++) {
+		            				if(dugmici.get(i).getName().equals(tabela.getAttributes().get(j).getName())) {
+		            					naziviKolona.add(tabela.getAttributes().get(j).getCode());
+		            					System.out.println("CODE "+tabela.getAttributes().get(j).getCode());
+		            					break;
+		            				}
+		            			}
+		            		}
+		            		
+		            		
+		            		
+		            		String nov="";
+		            		int pozicija=0;
+							String kolone = "";
+							 if(unosFrom.getText().equals("") && !(unosTo.getText().equals(""))) {
+				     	        	
+									if(naziviKolona.size()!=0) {
+										for(int i=0;i<naziviKolona.size();i++) {
+											kolone+=naziviKolona.get(i)+" <= "+unosTo.getText() +" and ";
+										}
+										pozicija=kolone.lastIndexOf("and");
+										System.out.println(pozicija+"na or");
+										nov = kolone.substring(0, pozicija-1);
+										
+									}
+									else {
+										for(int i=0;i<svikodovi.size();i++) {
+											for(int j=0;j<tabela.getAttributes().size();j++) {
+												if((svikodovi.get(i).equals(tabela.getAttributes().get(j).getCode()))  && (tabela.getAttributes().get(j).getType().equals("number"))){
+											kolone+=svikodovi.get(i)+" <= "+unosTo.getText() + " or ";
+										}
+											}
+										}
+										pozicija=kolone.lastIndexOf("or");
+										System.out.println(pozicija+"na or");
+										nov = kolone.substring(0, pozicija-1);
+										
+										
+									}
+									}
+									
+								
+
+							
+							if(unosTo.getText().equals("") && !(unosFrom.getText().equals(""))) {
+							
+							if(naziviKolona.size()!=0) {
+								for(int i=0;i<naziviKolona.size();i++) {
+									kolone+=naziviKolona.get(i)+" >= "+ unosFrom.getText() +" and ";
+								}
+								pozicija=kolone.lastIndexOf("and");
+								System.out.println(pozicija+"na or");
+								nov = kolone.substring(0, pozicija-1);
+								
+							}
+							else {
+								for(int i=0;i<svikodovi.size();i++) {
+									for(int j=0;j<tabela.getAttributes().size();j++) {
+										if((svikodovi.get(i).equals(tabela.getAttributes().get(j).getCode()))  && (tabela.getAttributes().get(j).getType().equals("number"))){
+									kolone+=svikodovi.get(i)+" >= "+ unosFrom.getText() + " or ";
+								}
+									}
+								}
+								pozicija=kolone.lastIndexOf("or");
+								System.out.println(pozicija+"na or");
+								nov = kolone.substring(0, pozicija-1);
+								
+								
+							}
+							}
+							
+							if(!(unosTo.getText().equals("")) && !(unosFrom.getText().equals(""))) {
+								
+								
+								if(naziviKolona.size()!=0) {
+									for(int i=0;i<naziviKolona.size();i++) {
+										kolone+=naziviKolona.get(i)+" between "+ unosFrom.getText()+" and "+ unosTo.getText() +" and ";
+									}
+									pozicija=kolone.lastIndexOf("and");
+									System.out.println(pozicija+"na or");
+									nov = kolone.substring(0, pozicija-1);
+									
+								}
+								else {
+									for(int i=0;i<svikodovi.size();i++) {
+										for(int j=0;j<tabela.getAttributes().size();j++) {
+											if((svikodovi.get(i).equals(tabela.getAttributes().get(j).getCode()))  && (tabela.getAttributes().get(j).getType().equals("number"))){
+										kolone+=svikodovi.get(i)+" between "+ unosFrom.getText()+" and "+ unosTo.getText() +" or ";
+									}
+										}
+									}
+									pozicija=kolone.lastIndexOf("or");
+									System.out.println(pozicija+"na or");
+									nov = kolone.substring(0, pozicija-1);
+									
+									
+								}
+								
+								
+								
+							}
+							
+							Connection conn = DriverManager.getConnection("jdbc:jtds:sqlserver://147.91.175.155/psw-2018-tim2-4","psw-2018-tim2-4","tim2-413090834");
+						String query = "select * from "+imeTabele + " where "  + nov+";";
+						 if(unosFrom.getText().equals("") && (unosTo.getText().equals(""))) {
+ 			                   query = "select * from " + imeTabele +";";
+			     	        }
+						System.out.println(query);
+						
+						
+						PreparedStatement pstmt = conn.prepareStatement(query);
+		                ResultSet rset = pstmt.executeQuery();
+						
+						int brojac=0;
+						while(rset.next()) {
+							brojac++;
+						}
+						rset = pstmt.executeQuery();
+						//System.out.println(brojac);
+						//provera da li ima podataka u resultset-u
+						if(!rset.isBeforeFirst()) {
+							System.out.println("Nema podataka");
+						}
+						
+						int brPar=t.getColumnCount();
+						Object[][] data=new Object[brojac][brPar];
+			
+						int brojac2=0;
+						while(rset.next()) {
+							for(int i=0;i<brPar;i++) {
+								data[brojac2][i]=rset.getString(i+1);
+							}
+							brojac2++;
+						}
+						
+						rset.close();
+						pstmt.close();
+						
+						 ta = new JTable(data, names);
+						  p2.add(text);
+							 p2.add(getNum());
+							
+							 p2.add(getBul());
+							 p2.add(getDate());
+							 p3.add(p1, BorderLayout.NORTH);
+							 p3.add(p2,BorderLayout.SOUTH);
+							 glavniPanel.add(p3,BorderLayout.NORTH);
+
+
+							
+							
+								getPa2().removeAll();
+								getPa2().add(glavniPanel);
+								getPa2().revalidate();
+								getPa2().repaint();
+							panelcic.removeAll();
+							panelcic.setPreferredSize(new Dimension(800, 800));
+							panelcic.setLayout(new BorderLayout());
+							panelcic.add(getPa2(),BorderLayout.NORTH);
+						
+							
+						
+					    	frame.setPreferredSize(new Dimension(800, 800));
+					    	
+
+					    
+					    	scrollPane.setViewportView(ta);
+					    	scrollPane.revalidate();
+					    	scrollPane.repaint();
+					    	
+					    	panelcic.add(scrollPane,BorderLayout.CENTER);
+					    	panelcic.revalidate();
+					    	panelcic.repaint();
+					      //	frame.removeAll();
+					    	pap.removeAll();
+					    	pap.add(operations);
+					    	pap.add(panelcic);
+					    	pap.revalidate();
+					    	pap.repaint();
+					    	frame.add(pap);
+							frame.revalidate();
+							frame.repaint();
+						//	return;
+						
+						
+						} catch (SQLException ee) {
+							// TODO Auto-generated catch block
+							ee.printStackTrace();
+						}
+		            
+	            }
+
+	            @Override
+	            public void changedUpdate(DocumentEvent e) {
+	                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	            }
+
+			
+
+	        });
+			
+			
+			
+	unosTo.getDocument().addDocumentListener(new DocumentListener(){
+        
+		
+		
+        @Override
+        public void insertUpdate(DocumentEvent e) {
+
+        	    
+           	for(int i=0;i<dugmici.size();i++) {
+           		System.out.println("cekirao " + dugmici.get(i).getName());
+           	}
+           	
+           	try {
+           		naziviKolona.clear();
+           		
+           		for(int i=0;i<dugmici.size();i++) {
+           			for(int j=0;j<tabela.getAttributes().size();j++) {
+           				if(dugmici.get(i).getName().equals(tabela.getAttributes().get(j).getName())) {
+           					naziviKolona.add(tabela.getAttributes().get(j).getCode());
+           					System.out.println("CODE "+tabela.getAttributes().get(j).getCode());
+           					break;
+           				}
+           			}
+           		}
+           		
+           		
+           		
+           		String nov="";
+           		int pozicija=0;
+					String kolone = "";
+					 if(unosFrom.getText().equals("") && !(unosTo.getText().equals(""))) {
+		     	        	
+							if(naziviKolona.size()!=0) {
+								for(int i=0;i<naziviKolona.size();i++) {
+									kolone+=naziviKolona.get(i)+" <= "+unosTo.getText() +" and ";
+								}
+								pozicija=kolone.lastIndexOf("and");
+								System.out.println(pozicija+"na or");
+								nov = kolone.substring(0, pozicija-1);
+								
+							}
+							else {
+								
+								for(int i=0;i<svikodovi.size();i++) {
+									for(int j=0;j<tabela.getAttributes().size();j++) {
+										if((svikodovi.get(i).equals(tabela.getAttributes().get(j).getCode()))  && (tabela.getAttributes().get(j).getType().equals("number"))){
+									kolone+=svikodovi.get(i)+" <= "+unosTo.getText() + " or ";
+								}
+									}
+								}
+								pozicija=kolone.lastIndexOf("or");
+								System.out.println(pozicija+"na or");
+								nov = kolone.substring(0, pozicija-1);
+								
+								
+							}
+							}
+							
+						
+					
+					if(unosTo.getText().equals("") && !(unosFrom.getText().equals(""))) {
+					
+					if(naziviKolona.size()!=0) {
+						for(int i=0;i<naziviKolona.size();i++) {
+							kolone+=naziviKolona.get(i)+" >= "+ unosFrom.getText() +" and ";
+						}
+						pozicija=kolone.lastIndexOf("and");
+						System.out.println(pozicija+"na or");
+						nov = kolone.substring(0, pozicija-1);
+						
+					}
+					else {
+						for(int i=0;i<svikodovi.size();i++) {
+							for(int j=0;j<tabela.getAttributes().size();j++) {
+								if((svikodovi.get(i).equals(tabela.getAttributes().get(j).getCode()))  && (tabela.getAttributes().get(j).getType().equals("number"))){
+							kolone+=svikodovi.get(i)+" >= "+ unosFrom.getText() + " or ";
+						}
+							}
+						}
+						pozicija=kolone.lastIndexOf("or");
+						System.out.println(pozicija+"na or");
+						nov = kolone.substring(0, pozicija-1);
+						
+						
+					}
+					}
+					
+					if(!(unosTo.getText().equals("")) && !(unosFrom.getText().equals(""))) {
+						
+						
+						if(naziviKolona.size()!=0) {
+							for(int i=0;i<naziviKolona.size();i++) {
+								kolone+=naziviKolona.get(i)+" between "+ unosFrom.getText()+" and "+ unosTo.getText() +" and ";
+							}
+							pozicija=kolone.lastIndexOf("and");
+							System.out.println(pozicija+"na or");
+							nov = kolone.substring(0, pozicija-1);
+							
+						}
+						else {
+							for(int i=0;i<svikodovi.size();i++) {
+								for(int j=0;j<tabela.getAttributes().size();j++) {
+									if((svikodovi.get(i).equals(tabela.getAttributes().get(j).getCode()))  && (tabela.getAttributes().get(j).getType().equals("number"))){
+								kolone+=svikodovi.get(i)+" between "+ unosFrom.getText()+" and "+ unosTo.getText() +" or ";
+							}
+								}
+							}
+							pozicija=kolone.lastIndexOf("or");
+							System.out.println(pozicija+"na or");
+							nov = kolone.substring(0, pozicija-1);
+							
+							
+						}
+						
+						
+						
+					}
+					
+					Connection conn = DriverManager.getConnection("jdbc:jtds:sqlserver://147.91.175.155/psw-2018-tim2-4","psw-2018-tim2-4","tim2-413090834");
+				String query = "select * from "+imeTabele + " where "  + nov+";";
+				System.out.println(query);
+				 if(unosFrom.getText().equals("") && (unosTo.getText().equals(""))) {
+	                   query = "select * from " + imeTabele +";";
+   	        }
+			
+				
+				PreparedStatement pstmt = conn.prepareStatement(query);
+               ResultSet rset = pstmt.executeQuery();
+				
+				int brojac=0;
+				while(rset.next()) {
+					brojac++;
+				}
+				rset = pstmt.executeQuery();
+				//System.out.println(brojac);
+				//provera da li ima podataka u resultset-u
+				if(!rset.isBeforeFirst()) {
+					System.out.println("Nema podataka");
+				}
+				
+				int brPar=t.getColumnCount();
+				Object[][] data=new Object[brojac][brPar];
+	
+				int brojac2=0;
+				while(rset.next()) {
+					for(int i=0;i<brPar;i++) {
+						data[brojac2][i]=rset.getString(i+1);
+					}
+					brojac2++;
+				}
+				
+				rset.close();
+				pstmt.close();
+				
+				 ta = new JTable(data, names);
+				  p2.add(text);
+					 p2.add(getNum());
+					
+					 p2.add(getBul());
+					 p2.add(getDate());
+					 p3.add(p1, BorderLayout.NORTH);
+					 p3.add(p2,BorderLayout.SOUTH);
+					 glavniPanel.add(p3,BorderLayout.NORTH);
+
+
+					
+					
+						getPa2().removeAll();
+						getPa2().add(glavniPanel);
+						getPa2().revalidate();
+						getPa2().repaint();
+					panelcic.removeAll();
+					panelcic.setPreferredSize(new Dimension(800, 800));
+					panelcic.setLayout(new BorderLayout());
+					panelcic.add(getPa2(),BorderLayout.NORTH);
+				
+					
+				
+			    	frame.setPreferredSize(new Dimension(800, 800));
+			    	
+
+			    
+			    	scrollPane.setViewportView(ta);
+			    	scrollPane.revalidate();
+			    	scrollPane.repaint();
+			    	
+			    	panelcic.add(scrollPane,BorderLayout.CENTER);
+			    	panelcic.revalidate();
+			    	panelcic.repaint();
+			      //	frame.removeAll();
+			    	pap.removeAll();
+			    	pap.add(operations);
+			    	pap.add(panelcic);
+			    	pap.revalidate();
+			    	pap.repaint();
+			    	frame.add(pap);
+					frame.revalidate();
+					frame.repaint();
+				//	return;
+				
+				
+				} catch (SQLException ee) {
+					// TODO Auto-generated catch block
+					ee.printStackTrace();
+				}
+              
+        
+        }
+
+        @Override
+        public void removeUpdate(DocumentEvent e) {
+
+           	for(int i=0;i<dugmici.size();i++) {
+           		System.out.println("cekirao " + dugmici.get(i).getName());
+           	}
+           	
+           	try {
+           		naziviKolona.clear();
+           		
+           		for(int i=0;i<dugmici.size();i++) {
+           			for(int j=0;j<tabela.getAttributes().size();j++) {
+           				if(dugmici.get(i).getName().equals(tabela.getAttributes().get(j).getName())) {
+           					naziviKolona.add(tabela.getAttributes().get(j).getCode());
+           					System.out.println("CODE "+tabela.getAttributes().get(j).getCode());
+           					break;
+           				}
+           			}
+           		}
+           		
+           		
+           		
+           		String nov="";
+           		int pozicija=0;
+					String kolone = "";
+					 if(unosFrom.getText().equals("") && !(unosTo.getText().equals(""))) {
+		     	        	
+							if(naziviKolona.size()!=0) {
+								for(int i=0;i<naziviKolona.size();i++) {
+									kolone+=naziviKolona.get(i)+" <= "+unosTo.getText() +" and ";
+								}
+								pozicija=kolone.lastIndexOf("and");
+								System.out.println(pozicija+"na or");
+								nov = kolone.substring(0, pozicija-1);
+								
+							}
+							else {
+								for(int i=0;i<svikodovi.size();i++) {
+									for(int j=0;j<tabela.getAttributes().size();j++) {
+										if((svikodovi.get(i).equals(tabela.getAttributes().get(j).getCode()))  && (tabela.getAttributes().get(j).getType().equals("number"))){
+									kolone+=svikodovi.get(i)+" <= "+unosTo.getText() + " or ";
+								}
+									}
+								}
+								pozicija=kolone.lastIndexOf("or");
+								System.out.println(pozicija+"na or");
+								nov = kolone.substring(0, pozicija-1);
+								
+								
+							}
+							}
+							
+						
+
+					
+					if(unosTo.getText().equals("") && !(unosFrom.getText().equals(""))) {
+					
+					if(naziviKolona.size()!=0) {
+						for(int i=0;i<naziviKolona.size();i++) {
+							kolone+=naziviKolona.get(i)+" >= "+ unosFrom.getText() +" and ";
+						}
+						pozicija=kolone.lastIndexOf("and");
+						System.out.println(pozicija+"na or");
+						nov = kolone.substring(0, pozicija-1);
+						
+					}
+					else {
+						for(int i=0;i<svikodovi.size();i++) {
+							for(int j=0;j<tabela.getAttributes().size();j++) {
+								if((svikodovi.get(i).equals(tabela.getAttributes().get(j).getCode()))  && (tabela.getAttributes().get(j).getType().equals("number"))){
+							kolone+=svikodovi.get(i)+" >= "+ unosFrom.getText() + " or ";
+						}
+							}
+						}
+						pozicija=kolone.lastIndexOf("or");
+						System.out.println(pozicija+"na or");
+						nov = kolone.substring(0, pozicija-1);
+						
+						
+					}
+					}
+					
+					if(!(unosTo.getText().equals("")) && !(unosFrom.getText().equals(""))) {
+						
+						
+						if(naziviKolona.size()!=0) {
+							for(int i=0;i<naziviKolona.size();i++) {
+								kolone+=naziviKolona.get(i)+" between "+ unosFrom.getText()+" and "+ unosTo.getText() +" and ";
+							}
+							pozicija=kolone.lastIndexOf("and");
+							System.out.println(pozicija+"na or");
+							nov = kolone.substring(0, pozicija-1);
+							
+						}
+						else {
+							for(int i=0;i<svikodovi.size();i++) {
+								for(int j=0;j<tabela.getAttributes().size();j++) {
+									if((svikodovi.get(i).equals(tabela.getAttributes().get(j).getCode()))  && (tabela.getAttributes().get(j).getType().equals("number"))){
+								kolone+=svikodovi.get(i)+" between "+ unosFrom.getText()+" and "+ unosTo.getText() +" or ";
+							}
+								}
+							}
+							pozicija=kolone.lastIndexOf("or");
+							System.out.println(pozicija+"na or");
+							nov = kolone.substring(0, pozicija-1);
+							
+							
+						}
+						
+						
+						
+					}
+					
+					Connection conn = DriverManager.getConnection("jdbc:jtds:sqlserver://147.91.175.155/psw-2018-tim2-4","psw-2018-tim2-4","tim2-413090834");
+				String query = "select * from "+imeTabele + " where "  + nov+";";
+				System.out.println(query);
+				
+				 if(unosFrom.getText().equals("") && (unosTo.getText().equals(""))) {
+	                   query = "select * from " + imeTabele +";";
+   	        }
+			
+				PreparedStatement pstmt = conn.prepareStatement(query);
+               ResultSet rset = pstmt.executeQuery();
+				
+				int brojac=0;
+				while(rset.next()) {
+					brojac++;
+				}
+				rset = pstmt.executeQuery();
+				//System.out.println(brojac);
+				//provera da li ima podataka u resultset-u
+				if(!rset.isBeforeFirst()) {
+					System.out.println("Nema podataka");
+				}
+				
+				int brPar=t.getColumnCount();
+				Object[][] data=new Object[brojac][brPar];
+	
+				int brojac2=0;
+				while(rset.next()) {
+					for(int i=0;i<brPar;i++) {
+						data[brojac2][i]=rset.getString(i+1);
+					}
+					brojac2++;
+				}
+				
+				rset.close();
+				pstmt.close();
+				
+				 ta = new JTable(data, names);
+				  p2.add(text);
+					 p2.add(getNum());
+					
+					 p2.add(getBul());
+					 p2.add(getDate());
+					 p3.add(p1, BorderLayout.NORTH);
+					 p3.add(p2,BorderLayout.SOUTH);
+					 glavniPanel.add(p3,BorderLayout.NORTH);
+
+
+					
+					
+						getPa2().removeAll();
+						getPa2().add(glavniPanel);
+						getPa2().revalidate();
+						getPa2().repaint();
+					panelcic.removeAll();
+					panelcic.setPreferredSize(new Dimension(800, 800));
+					panelcic.setLayout(new BorderLayout());
+					panelcic.add(getPa2(),BorderLayout.NORTH);
+				
+					
+				
+			    	frame.setPreferredSize(new Dimension(800, 800));
+			    	
+
+			    
+			    	scrollPane.setViewportView(ta);
+			    	scrollPane.revalidate();
+			    	scrollPane.repaint();
+			    	
+			    	panelcic.add(scrollPane,BorderLayout.CENTER);
+			    	panelcic.revalidate();
+			    	panelcic.repaint();
+			    	pap.removeAll();
+			    	pap.add(operations);
+			    	pap.add(panelcic);
+			    	pap.revalidate();
+			    	pap.repaint();
+			    	frame.add(pap);
+					frame.revalidate();
+					frame.repaint();
+				//	return;
+				
+				
+				} catch (SQLException ee) {
+					// TODO Auto-generated catch block
+					ee.printStackTrace();
+				}
+           
+        
+        
+        }
+
+        @Override
+        public void changedUpdate(DocumentEvent e) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+	
+
+    });
+	
+			
+	
+	unesiOdDatumText.getDocument().addDocumentListener(new DocumentListener(){
+        
+		
+		
+        @Override
+        public void insertUpdate(DocumentEvent e) {
+//         	naziviKolona.clear();
+    /*        String text = unos.getText();
+
+            if (text.trim().length() == 0) {
+                rowSorter.setRowFilter(null);
+            } else {
+                rowSorter.setRowFilter(RowFilter.regexFilter("(?i)" + text));
+            }
+            
+            
+           
+      */  
+        	for(int i=0;i<dugmici.size();i++) {
+        		System.out.println("cekirao " + dugmici.get(i).getName());
+        	}
+        	
+        	try {
+        		naziviKolona.clear();
+        		
+        		for(int i=0;i<dugmici.size();i++) {
+        			for(int j=0;j<tabela.getAttributes().size();j++) {
+        				if(dugmici.get(i).getName().equals(tabela.getAttributes().get(j).getName())) {
+        					naziviKolona.add(tabela.getAttributes().get(j).getCode());
+        					System.out.println("CODE "+tabela.getAttributes().get(j).getCode());
+        					break;
+        				}
+        			}
+        		}
+        		
+        		
+        		
+        		String nov="";
+        		int pozicija=0;
+				String kolone = "";
+				
+				if(unesiDoDatumText.getText().equals("") || unesiDoDatumText.getText()==null) {
+				
+				if(naziviKolona.size()!=0) {
+					for(int i=0;i<naziviKolona.size();i++) {
+					kolone+=naziviKolona.get(i)+" >= "+ "\'"+unesiOdDatumText.getText()+"\'" +" and ";
+					}
+					
+					pozicija=kolone.lastIndexOf("and");
+					System.out.println(pozicija+"na or");
+					nov = kolone.substring(0, pozicija-1);
+					
+				}
+				else {
+					for(int i=0;i<svikodovi.size();i++) {
+						for(int j=0;j<tabela.getAttributes().size();j++) {
+							if((svikodovi.get(i).equals(tabela.getAttributes().get(j).getCode()))  && (tabela.getAttributes().get(j).getType().equals("string"))){
+					
+						kolone+=svikodovi.get(i)+" >= "+"\'"+unesiOdDatumText.getText()+"\'"+ " or ";
+					}
+						}
+					}
+					pozicija=kolone.lastIndexOf("or");
+					System.out.println(pozicija+"na or");
+					nov = kolone.substring(0, pozicija-1);
+					
+					
+				}
+				}
+				
+				else {
+					
+					
+					if(naziviKolona.size()!=0) {
+						for(int i=0;i<naziviKolona.size();i++) {
+							kolone+=naziviKolona.get(i)+" between "+"\'"+unesiOdDatumText.getText()+"\'" +" and "+ "\'"+unesiDoDatumText.getText()+"\'" +" and ";
+						}
+						pozicija=kolone.lastIndexOf("and");
+						System.out.println(pozicija+"na or");
+						nov = kolone.substring(0, pozicija-1);
+						
+					}
+					else {
+						for(int i=0;i<svikodovi.size();i++) {
+							for(int j=0;j<tabela.getAttributes().size();j++) {
+								if((svikodovi.get(i).equals(tabela.getAttributes().get(j).getCode()))  && (tabela.getAttributes().get(j).getType().equals("string"))){
+							kolone+=svikodovi.get(i)+" between "+"\'"+unesiOdDatumText.getText()+"\'" +" and "+ "\'"+unesiDoDatumText.getText()+"\'" +" or ";
+						}
+							}
+						}
+						pozicija=kolone.lastIndexOf("or");
+						System.out.println(pozicija+"na or");
+						nov = kolone.substring(0, pozicija-1);
+						
+						
+					}
+					
+					
+					
+				}
+				
+				Connection conn = DriverManager.getConnection("jdbc:jtds:sqlserver://147.91.175.155/psw-2018-tim2-4","psw-2018-tim2-4","tim2-413090834");
+			String query = "select * from "+imeTabele + " where "  + nov+";";
+			System.out.println(query);
+			
+			
+			PreparedStatement pstmt = conn.prepareStatement(query);
+            ResultSet rset = pstmt.executeQuery();
+			
+			int brojac=0;
+			while(rset.next()) {
+				brojac++;
+			}
+			rset = pstmt.executeQuery();
+			//System.out.println(brojac);
+			//provera da li ima podataka u resultset-u
+			if(!rset.isBeforeFirst()) {
+				System.out.println("Nema podataka");
+			}
+			
+			int brPar=t.getColumnCount();
+			Object[][] data=new Object[brojac][brPar];
+
+			int brojac2=0;
+			while(rset.next()) {
+				for(int i=0;i<brPar;i++) {
+					data[brojac2][i]=rset.getString(i+1);
+				}
+				brojac2++;
+			}
+			
+			rset.close();
+			pstmt.close();
+			
+			 ta = new JTable(data, names);
+			  p2.add(text);
+				 p2.add(getNum());
+				
+				 p2.add(getBul());
+				 p2.add(getDate());
+				 p3.add(p1, BorderLayout.NORTH);
+				 p3.add(p2,BorderLayout.SOUTH);
+				 glavniPanel.add(p3,BorderLayout.NORTH);
+
+
+				
+				
+					getPa2().removeAll();
+					getPa2().add(glavniPanel);
+					getPa2().revalidate();
+					getPa2().repaint();
+				panelcic.removeAll();
+				panelcic.setPreferredSize(new Dimension(800, 800));
+				panelcic.setLayout(new BorderLayout());
+				panelcic.add(getPa2(),BorderLayout.NORTH);
+			
+				
+			
+		    	frame.setPreferredSize(new Dimension(800, 800));
+		    	
+
+		    
+		    	scrollPane.setViewportView(ta);
+		    	scrollPane.revalidate();
+		    	scrollPane.repaint();
+		    	
+		    	panelcic.add(scrollPane,BorderLayout.CENTER);
+		    	panelcic.revalidate();
+		    	panelcic.repaint();
+		    	pap.removeAll();
+		    	pap.add(operations);
+		    	pap.add(panelcic);
+		    	pap.revalidate();
+		    	pap.repaint();
+		    	frame.add(pap);
+				frame.revalidate();
+				frame.repaint();
+			//	return;
+			
+			
+			} catch (SQLException ee) {
+				// TODO Auto-generated catch block
+				ee.printStackTrace();
+			}
+        
+        }
+
+        @Override
+        public void removeUpdate(DocumentEvent e) {
+        
+        	for(int i=0;i<dugmici.size();i++) {
+        		System.out.println("cekirao " + dugmici.get(i).getName());
+        	}
+        	
+        	try {
+        		naziviKolona.clear();
+        		
+        		for(int i=0;i<dugmici.size();i++) {
+        			for(int j=0;j<tabela.getAttributes().size();j++) {
+        				if(dugmici.get(i).getName().equals(tabela.getAttributes().get(j).getName())) {
+        					naziviKolona.add(tabela.getAttributes().get(j).getCode());
+        					System.out.println("CODE "+tabela.getAttributes().get(j).getCode());
+        					break;
+        				}
+        			}
+        		}
+        		
+        		
+        		
+        		String nov="";
+        		int pozicija=0;
+				String kolone = "";
+				
+				if(unesiDoDatumText.getText().equals("") || unesiDoDatumText.getText()==null) {
+				
+				if(naziviKolona.size()!=0) {
+					for(int i=0;i<naziviKolona.size();i++) {
+						kolone+=naziviKolona.get(i)+" >= "+ "\'"+unesiOdDatumText.getText()+"\'" +" and ";
+					}
+					pozicija=kolone.lastIndexOf("and");
+					System.out.println(pozicija+"na or");
+					nov = kolone.substring(0, pozicija-1);
+					
+				}
+				else {
+					for(int i=0;i<svikodovi.size();i++) {
+						for(int j=0;j<tabela.getAttributes().size();j++) {
+							if((svikodovi.get(i).equals(tabela.getAttributes().get(j).getCode()))  && (tabela.getAttributes().get(j).getType().equals("string"))){
+						kolone+=svikodovi.get(i)+" >= "+"\'"+unesiOdDatumText.getText()+"\'"+ " or ";
+					}
+						}
+					}
+					pozicija=kolone.lastIndexOf("or");
+					System.out.println(pozicija+"na or");
+					nov = kolone.substring(0, pozicija-1);
+					
+					
+				}
+				}
+				
+				else {
+					
+					
+					if(naziviKolona.size()!=0) {
+						for(int i=0;i<naziviKolona.size();i++) {
+							kolone+=naziviKolona.get(i)+" between "+"\'"+unesiOdDatumText.getText()+"\'" +" and "+ "\'"+unesiDoDatumText.getText()+"\'" +" and ";
+						}
+						pozicija=kolone.lastIndexOf("and");
+						System.out.println(pozicija+"na or");
+						nov = kolone.substring(0, pozicija-1);
+						
+					}
+					else {
+						for(int i=0;i<svikodovi.size();i++) {
+							for(int j=0;j<tabela.getAttributes().size();j++) {
+								if((svikodovi.get(i).equals(tabela.getAttributes().get(j).getCode()))  && (tabela.getAttributes().get(j).getType().equals("string"))){
+							kolone+=svikodovi.get(i)+" between "+"\'"+unesiOdDatumText.getText()+"\'" +" and "+ "\'"+unesiDoDatumText.getText()+"\'" +" or ";
+						}
+							}
+						}
+						pozicija=kolone.lastIndexOf("or");
+						System.out.println(pozicija+"na or");
+						nov = kolone.substring(0, pozicija-1);
+						
+						
+					}
+					
+					
+					
+				}
+				
+				Connection conn = DriverManager.getConnection("jdbc:jtds:sqlserver://147.91.175.155/psw-2018-tim2-4","psw-2018-tim2-4","tim2-413090834");
+			String query = "select * from "+imeTabele + " where "  + nov+";";
+			System.out.println(query);
+			
+			
+			PreparedStatement pstmt = conn.prepareStatement(query);
+            ResultSet rset = pstmt.executeQuery();
+			
+			int brojac=0;
+			while(rset.next()) {
+				brojac++;
+			}
+			rset = pstmt.executeQuery();
+			//System.out.println(brojac);
+			//provera da li ima podataka u resultset-u
+			if(!rset.isBeforeFirst()) {
+				System.out.println("Nema podataka");
+			}
+			
+			int brPar=t.getColumnCount();
+			Object[][] data=new Object[brojac][brPar];
+
+			int brojac2=0;
+			while(rset.next()) {
+				for(int i=0;i<brPar;i++) {
+					data[brojac2][i]=rset.getString(i+1);
+				}
+				brojac2++;
+			}
+			
+			rset.close();
+			pstmt.close();
+			
+			 ta = new JTable(data, names);
+			  p2.add(text);
+				 p2.add(getNum());
+				
+				 p2.add(getBul());
+				 p2.add(getDate());
+				 p3.add(p1, BorderLayout.NORTH);
+				 p3.add(p2,BorderLayout.SOUTH);
+				 glavniPanel.add(p3,BorderLayout.NORTH);
+
+
+				
+				
+					getPa2().removeAll();
+					getPa2().add(glavniPanel);
+					getPa2().revalidate();
+					getPa2().repaint();
+				panelcic.removeAll();
+				panelcic.setPreferredSize(new Dimension(800, 800));
+				panelcic.setLayout(new BorderLayout());
+				panelcic.add(getPa2(),BorderLayout.NORTH);
+			
+				
+			
+		    	frame.setPreferredSize(new Dimension(800, 800));
+		    	
+
+		    
+		    	scrollPane.setViewportView(ta);
+		    	scrollPane.revalidate();
+		    	scrollPane.repaint();
+		    	
+		    	panelcic.add(scrollPane,BorderLayout.CENTER);
+		    	panelcic.revalidate();
+		    	panelcic.repaint();
+		    	pap.removeAll();
+		    	pap.add(operations);
+		    	pap.add(panelcic);
+		    	pap.revalidate();
+		    	pap.repaint();
+		    	frame.add(pap);
+				frame.revalidate();
+				frame.repaint();
+				//return;
+			
+			
+			} catch (SQLException ee) {
+				// TODO Auto-generated catch block
+				ee.printStackTrace();
+			}
+        
+        
+        }
+
+        @Override
+        public void changedUpdate(DocumentEvent e) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+	
+
+    });
+	
+	
+	istina.addActionListener(new ActionListener() {
+		
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			// TODO Auto-generated method stub
+			naziviKolona.clear();
+    		
+    		for(int i=0;i<dugmici.size();i++) {
+    			for(int j=0;j<tabela.getAttributes().size();j++) {
+    				if(dugmici.get(i).getName().equals(tabela.getAttributes().get(j).getName())) {
+    					naziviKolona.add(tabela.getAttributes().get(j).getCode());
+    					System.out.println("CODE "+tabela.getAttributes().get(j).getCode());
+    					break;
+    				}
+    			}
+    		}
+    		String nov="";
+    		int pozicija=0;
+			String kolone = "";
+			
+			
+			
+			if(naziviKolona.size()!=0) {
+				for(int i=0;i<naziviKolona.size();i++) {
+					kolone+=naziviKolona.get(i)+" = "+ "1" +" and ";
+				}
+				pozicija=kolone.lastIndexOf("and");
+				System.out.println(pozicija+"na or");
+				nov = kolone.substring(0, pozicija-1);
+				
+			}
+			else {
+				for(int i=0;i<svikodovi.size();i++) {
+					for(int j=0;j<tabela.getAttributes().size();j++) {
+						if((svikodovi.get(i).equals(tabela.getAttributes().get(j).getCode()))  && (tabela.getAttributes().get(j).getType().equals("boolean"))){
+					kolone+=svikodovi.get(i)+" = "+"1"+ " or ";
+				}
+					}
+				}
+				pozicija=kolone.lastIndexOf("or");
+				System.out.println(pozicija+"na or");
+				nov = kolone.substring(0, pozicija-1);
+				
+				
+			}
+			
+		
+			
+			
+			try {
+				Connection conn = DriverManager.getConnection("jdbc:jtds:sqlserver://147.91.175.155/psw-2018-tim2-4","psw-2018-tim2-4","tim2-413090834");
+			
+			String query = "select * from "+imeTabele + " where "  + nov+";";
+			System.out.println(query);
+			
+			
+			PreparedStatement pstmt = conn.prepareStatement(query);
+            ResultSet rset = pstmt.executeQuery();
+			
+			int brojac=0;
+			while(rset.next()) {
+				brojac++;
+			}
+			rset = pstmt.executeQuery();
+			//System.out.println(brojac);
+			//provera da li ima podataka u resultset-u
+			if(!rset.isBeforeFirst()) {
+				System.out.println("Nema podataka");
+			}
+			
+			int brPar=t.getColumnCount();
+			Object[][] data=new Object[brojac][brPar];
+
+			int brojac2=0;
+			while(rset.next()) {
+				for(int i=0;i<brPar;i++) {
+					data[brojac2][i]=rset.getString(i+1);
+				}
+				brojac2++;
+			}
+			
+			rset.close();
+			pstmt.close();
+			
+			 ta = new JTable(data, names);
+			  p2.add(text);
+				 p2.add(getNum());
+				
+				 p2.add(getBul());
+				 p2.add(getDate());
+				 p3.add(p1, BorderLayout.NORTH);
+				 p3.add(p2,BorderLayout.SOUTH);
+				 glavniPanel.add(p3,BorderLayout.NORTH);
+
+
+				
+				
+					getPa2().removeAll();
+					getPa2().add(glavniPanel);
+					getPa2().revalidate();
+					getPa2().repaint();
+				panelcic.removeAll();
+				panelcic.setPreferredSize(new Dimension(800, 800));
+				panelcic.setLayout(new BorderLayout());
+				panelcic.add(getPa2(),BorderLayout.NORTH);
+			
+				
+			
+		    	frame.setPreferredSize(new Dimension(800, 800));
+		    	
+
+		    
+		    	scrollPane.setViewportView(ta);
+		    	scrollPane.revalidate();
+		    	scrollPane.repaint();
+		    	
+		    	panelcic.add(scrollPane,BorderLayout.CENTER);
+		    	panelcic.revalidate();
+		    	panelcic.repaint();
+		    	pap.removeAll();
+		    	pap.add(operations);
+		    	pap.add(panelcic);
+		    	pap.revalidate();
+		    	pap.repaint();
+		    	frame.add(pap);
+				frame.revalidate();
+				frame.repaint();
+			//	return;
+			}catch (Exception ee) {
+				// TODO: handle exception
+			}
+			
+			
+			
+			
+			
+			
+			
+			
+		}
+	});
+	
+	
+	
+
+	laz.addActionListener(new ActionListener() {
+		
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			// TODO Auto-generated method stub
+			naziviKolona.clear();
+    		
+    		for(int i=0;i<dugmici.size();i++) {
+    			for(int j=0;j<tabela.getAttributes().size();j++) {
+    				if(dugmici.get(i).getName().equals(tabela.getAttributes().get(j).getName())) {
+    					naziviKolona.add(tabela.getAttributes().get(j).getCode());
+    					System.out.println("CODE "+tabela.getAttributes().get(j).getCode());
+    					break;
+    				}
+    			}
+    		}
+    		String nov="";
+    		int pozicija=0;
+			String kolone = "";
+			
+			
+			
+			if(naziviKolona.size()!=0) {
+				for(int i=0;i<naziviKolona.size();i++) {
+					kolone+=naziviKolona.get(i)+" = "+ "0" +" and ";
+				}
+				pozicija=kolone.lastIndexOf("and");
+				System.out.println(pozicija+"na or");
+				nov = kolone.substring(0, pozicija-1);
+				
+			}
+			else {
+				for(int i=0;i<svikodovi.size();i++) {
+					for(int j=0;j<tabela.getAttributes().size();j++) {
+						if((svikodovi.get(i).equals(tabela.getAttributes().get(j).getCode()))  && (tabela.getAttributes().get(j).getType().equals("boolean"))){
+					kolone+=svikodovi.get(i)+" = "+"0"+ " or ";
+				}
+					}
+				}
+				pozicija=kolone.lastIndexOf("or");
+				System.out.println(pozicija+"na or");
+				nov = kolone.substring(0, pozicija-1);
+				
+				
+			}
+			
+		
+			
+			
+			try {
+				Connection conn = DriverManager.getConnection("jdbc:jtds:sqlserver://147.91.175.155/psw-2018-tim2-4","psw-2018-tim2-4","tim2-413090834");
+			
+			String query = "select * from "+imeTabele + " where "  + nov+";";
+			System.out.println(query);
+			
+			
+			PreparedStatement pstmt = conn.prepareStatement(query);
+            ResultSet rset = pstmt.executeQuery();
+			
+			int brojac=0;
+			while(rset.next()) {
+				brojac++;
+			}
+			rset = pstmt.executeQuery();
+			//System.out.println(brojac);
+			//provera da li ima podataka u resultset-u
+			if(!rset.isBeforeFirst()) {
+				System.out.println("Nema podataka");
+			}
+			
+			int brPar=t.getColumnCount();
+			Object[][] data=new Object[brojac][brPar];
+
+			int brojac2=0;
+			while(rset.next()) {
+				for(int i=0;i<brPar;i++) {
+					data[brojac2][i]=rset.getString(i+1);
+				}
+				brojac2++;
+			}
+			
+			rset.close();
+			pstmt.close();
+			
+			 ta = new JTable(data, names);
+			  p2.add(text);
+				 p2.add(getNum());
+				
+				 p2.add(getBul());
+				 p2.add(getDate());
+				 p3.add(p1, BorderLayout.NORTH);
+				 p3.add(p2,BorderLayout.SOUTH);
+				 glavniPanel.add(p3,BorderLayout.NORTH);
+
+
+				
+				
+					getPa2().removeAll();
+					getPa2().add(glavniPanel);
+					getPa2().revalidate();
+					getPa2().repaint();
+				panelcic.removeAll();
+				panelcic.setPreferredSize(new Dimension(800, 800));
+				panelcic.setLayout(new BorderLayout());
+				panelcic.add(getPa2(),BorderLayout.NORTH);
+			
+				
+			
+		    	frame.setPreferredSize(new Dimension(800, 800));
+		    	
+
+		    
+		    	scrollPane.setViewportView(ta);
+		    	scrollPane.revalidate();
+		    	scrollPane.repaint();
+		    	
+		    	panelcic.add(scrollPane,BorderLayout.CENTER);
+		    	panelcic.revalidate();
+		    	panelcic.repaint();
+		    	pap.removeAll();
+		    	pap.add(operations);
+		    	pap.add(panelcic);
+		    	pap.revalidate();
+		    	pap.repaint();
+		    	frame.add(pap);
+				frame.revalidate();
+				frame.repaint();
+			//	return;
+			}catch (Exception ee) {
+				// TODO: handle exception
+			}
+			
+			
+			
+			
+			
+			
+			
+			
+		}
+	});
+	
+	
+unesiDoDatumText.getDocument().addDocumentListener(new DocumentListener(){
+        
+		
+		
+        @Override
+        public void insertUpdate(DocumentEvent e) {
+//         	naziviKolona.clear();
+    /*        String text = unos.getText();
+
+            if (text.trim().length() == 0) {
+                rowSorter.setRowFilter(null);
+            } else {
+                rowSorter.setRowFilter(RowFilter.regexFilter("(?i)" + text));
+            }
+            
+            
+           
+      */  
+        	for(int i=0;i<dugmici.size();i++) {
+        		System.out.println("cekirao " + dugmici.get(i).getName());
+        	}
+        	
+        	try {
+        		naziviKolona.clear();
+        		
+        		for(int i=0;i<dugmici.size();i++) {
+        			for(int j=0;j<tabela.getAttributes().size();j++) {
+        				if(dugmici.get(i).getName().equals(tabela.getAttributes().get(j).getName())) {
+        					naziviKolona.add(tabela.getAttributes().get(j).getCode());
+        					System.out.println("CODE "+tabela.getAttributes().get(j).getCode());
+        					break;
+        				}
+        			}
+        		}
+        		
+        		
+        		
+        		String nov="";
+        		int pozicija=0;
+				String kolone = "";
+				
+				if(unesiOdDatumText.getText().equals("") || unesiOdDatumText.getText()==null) {
+				
+				if(naziviKolona.size()!=0) {
+					for(int i=0;i<naziviKolona.size();i++) {
+						kolone+=naziviKolona.get(i)+" <= "+ "\'"+unesiDoDatumText.getText()+"\'" +" and ";
+					}
+					pozicija=kolone.lastIndexOf("and");
+					System.out.println(pozicija+"na or");
+					nov = kolone.substring(0, pozicija-1);
+					
+				}
+				else {
+					for(int i=0;i<svikodovi.size();i++) {
+						for(int j=0;j<tabela.getAttributes().size();j++) {
+							if((svikodovi.get(i).equals(tabela.getAttributes().get(j).getCode()))  && (tabela.getAttributes().get(j).getType().equals("string"))){
+						kolone+=svikodovi.get(i)+" <= "+"\'"+unesiDoDatumText.getText()+"\'"+ " or ";
+					}
+						}
+					}
+					pozicija=kolone.lastIndexOf("or");
+					System.out.println(pozicija+"na or");
+					nov = kolone.substring(0, pozicija-1);
+					
+					
+				}
+				}
+				
+				else {
+					
+					
+					if(naziviKolona.size()!=0) {
+						for(int i=0;i<naziviKolona.size();i++) {
+							kolone+=naziviKolona.get(i)+" between "+"\'"+unesiOdDatumText.getText()+"\'" +" and "+ "\'"+unesiDoDatumText.getText()+"\'" +" and ";
+						}
+						pozicija=kolone.lastIndexOf("and");
+						System.out.println(pozicija+"na or");
+						nov = kolone.substring(0, pozicija-1);
+						
+					}
+					else {
+						for(int i=0;i<svikodovi.size();i++) {
+							for(int j=0;j<tabela.getAttributes().size();j++) {
+								if((svikodovi.get(i).equals(tabela.getAttributes().get(j).getCode()))  && (tabela.getAttributes().get(j).getType().equals("string"))){
+							kolone+=svikodovi.get(i)+" between "+"\'"+unesiOdDatumText.getText()+"\'" +" and "+ "\'"+unesiDoDatumText.getText()+"\'" +" or ";
+						}
+							}
+						}
+						pozicija=kolone.lastIndexOf("or");
+						System.out.println(pozicija+"na or");
+						nov = kolone.substring(0, pozicija-1);
+						
+						
+					}
+					
+					
+					
+				}
+				
+				Connection conn = DriverManager.getConnection("jdbc:jtds:sqlserver://147.91.175.155/psw-2018-tim2-4","psw-2018-tim2-4","tim2-413090834");
+			String query = "select * from "+imeTabele + " where "  + nov+";";
+			System.out.println(query);
+			
+			
+			PreparedStatement pstmt = conn.prepareStatement(query);
+            ResultSet rset = pstmt.executeQuery();
+			
+			int brojac=0;
+			while(rset.next()) {
+				brojac++;
+			}
+			rset = pstmt.executeQuery();
+			//System.out.println(brojac);
+			//provera da li ima podataka u resultset-u
+			if(!rset.isBeforeFirst()) {
+				System.out.println("Nema podataka");
+			}
+			
+			int brPar=t.getColumnCount();
+			Object[][] data=new Object[brojac][brPar];
+
+			int brojac2=0;
+			while(rset.next()) {
+				for(int i=0;i<brPar;i++) {
+					data[brojac2][i]=rset.getString(i+1);
+				}
+				brojac2++;
+			}
+			
+			rset.close();
+			pstmt.close();
+			
+			 ta = new JTable(data, names);
+			  p2.add(text);
+				 p2.add(getNum());
+				
+				 p2.add(getBul());
+				 p2.add(getDate());
+				 p3.add(p1, BorderLayout.NORTH);
+				 p3.add(p2,BorderLayout.SOUTH);
+				 glavniPanel.add(p3,BorderLayout.NORTH);
+
+
+				
+				
+					getPa2().removeAll();
+					getPa2().add(glavniPanel);
+					getPa2().revalidate();
+					getPa2().repaint();
+				panelcic.removeAll();
+				panelcic.setPreferredSize(new Dimension(800, 800));
+				panelcic.setLayout(new BorderLayout());
+				panelcic.add(getPa2(),BorderLayout.NORTH);
+			
+				
+			
+		    	frame.setPreferredSize(new Dimension(800, 800));
+		    	
+
+		    
+		    	scrollPane.setViewportView(ta);
+		    	scrollPane.revalidate();
+		    	scrollPane.repaint();
+		    	
+		    	panelcic.add(scrollPane,BorderLayout.CENTER);
+		    	panelcic.revalidate();
+		    	panelcic.repaint();
+		    	pap.removeAll();
+		    	pap.add(operations);
+		    	pap.add(panelcic);
+		    	pap.revalidate();
+		    	pap.repaint();
+		    	frame.add(pap);
+				frame.revalidate();
+				frame.repaint();
+			//	return;
+			
+			
+			} catch (SQLException ee) {
+				// TODO Auto-generated catch block
+				ee.printStackTrace();
+			}
+        
+        }
+
+        @Override
+        public void removeUpdate(DocumentEvent e) {
+        
+        	for(int i=0;i<dugmici.size();i++) {
+        		System.out.println("cekirao " + dugmici.get(i).getName());
+        	}
+        	
+        	try {
+        		naziviKolona.clear();
+        		
+        		for(int i=0;i<dugmici.size();i++) {
+        			for(int j=0;j<tabela.getAttributes().size();j++) {
+        				if(dugmici.get(i).getName().equals(tabela.getAttributes().get(j).getName())) {
+        					naziviKolona.add(tabela.getAttributes().get(j).getCode());
+        					System.out.println("CODE "+tabela.getAttributes().get(j).getCode());
+        					break;
+        				}
+        			}
+        		}
+        		
+        		
+        		
+        		String nov="";
+        		int pozicija=0;
+				String kolone = "";
+				
+				if(unesiOdDatumText.getText().equals("") || unesiOdDatumText.getText()==null) {
+				
+				if(naziviKolona.size()!=0) {
+					for(int i=0;i<naziviKolona.size();i++) {
+						kolone+=naziviKolona.get(i)+" <= "+ "\'"+unesiDoDatumText.getText()+"\'" +" and ";
+					}
+					pozicija=kolone.lastIndexOf("and");
+					System.out.println(pozicija+"na or");
+					nov = kolone.substring(0, pozicija-1);
+					
+				}
+				else {
+					for(int i=0;i<svikodovi.size();i++) {
+						for(int j=0;j<tabela.getAttributes().size();j++) {
+							if((svikodovi.get(i).equals(tabela.getAttributes().get(j).getCode()))  && (tabela.getAttributes().get(j).getType().equals("string"))){
+						kolone+=svikodovi.get(i)+" <= "+"\'"+unesiDoDatumText.getText()+"\'"+ " or ";
+					}
+						}
+					}
+					pozicija=kolone.lastIndexOf("or");
+					System.out.println(pozicija+"na or");
+					nov = kolone.substring(0, pozicija-1);
+					
+					
+				}
+				}
+				
+				else {
+					
+					
+					if(naziviKolona.size()!=0) {
+						for(int i=0;i<naziviKolona.size();i++) {
+							kolone+=naziviKolona.get(i)+" between "+"\'"+unesiOdDatumText.getText()+"\'" +" and "+ "\'"+unesiDoDatumText.getText()+"\'" +" and ";
+						}
+						pozicija=kolone.lastIndexOf("and");
+						System.out.println(pozicija+"na or");
+						nov = kolone.substring(0, pozicija-1);
+						
+					}
+					else {
+						for(int i=0;i<svikodovi.size();i++) {
+							for(int j=0;j<tabela.getAttributes().size();j++) {
+								if((svikodovi.get(i).equals(tabela.getAttributes().get(j).getCode()))  && (tabela.getAttributes().get(j).getType().equals("string"))){
+							kolone+=svikodovi.get(i)+" between "+"\'"+unesiOdDatumText.getText()+"\'" +" and "+ "\'"+unesiDoDatumText.getText()+"\'" +" or ";
+						}}}
+						pozicija=kolone.lastIndexOf("or");
+						System.out.println(pozicija+"na or");
+						nov = kolone.substring(0, pozicija-1);
+						
+						
+					}
+					
+					
+					
+				}
+				
+				Connection conn = DriverManager.getConnection("jdbc:jtds:sqlserver://147.91.175.155/psw-2018-tim2-4","psw-2018-tim2-4","tim2-413090834");
+			String query = "select * from "+imeTabele + " where "  + nov+";";
+			System.out.println(query);
+			
+			
+			PreparedStatement pstmt = conn.prepareStatement(query);
+            ResultSet rset = pstmt.executeQuery();
+			
+			int brojac=0;
+			while(rset.next()) {
+				brojac++;
+			}
+			rset = pstmt.executeQuery();
+			//System.out.println(brojac);
+			//provera da li ima podataka u resultset-u
+			if(!rset.isBeforeFirst()) {
+				System.out.println("Nema podataka");
+			}
+			
+			int brPar=t.getColumnCount();
+			Object[][] data=new Object[brojac][brPar];
+
+			int brojac2=0;
+			while(rset.next()) {
+				for(int i=0;i<brPar;i++) {
+					data[brojac2][i]=rset.getString(i+1);
+				}
+				brojac2++;
+			}
+			
+			rset.close();
+			pstmt.close();
+			
+			 ta = new JTable(data, names);
+			  p2.add(text);
+				 p2.add(getNum());
+				
+				 p2.add(getBul());
+				 p2.add(getDate());
+				 p3.add(p1, BorderLayout.NORTH);
+				 p3.add(p2,BorderLayout.SOUTH);
+				 glavniPanel.add(p3,BorderLayout.NORTH);
+
+
+				
+				
+					getPa2().removeAll();
+					getPa2().add(glavniPanel);
+					getPa2().revalidate();
+					getPa2().repaint();
+				panelcic.removeAll();
+				panelcic.setPreferredSize(new Dimension(800, 800));
+				panelcic.setLayout(new BorderLayout());
+				panelcic.add(getPa2(),BorderLayout.NORTH);
+			
+				
+			
+		    	frame.setPreferredSize(new Dimension(800, 800));
+		    	
+
+		    
+		    	scrollPane.setViewportView(ta);
+		    	scrollPane.revalidate();
+		    	scrollPane.repaint();
+		    	
+		    	panelcic.add(scrollPane,BorderLayout.CENTER);
+		    	panelcic.revalidate();
+		    	panelcic.repaint();
+		    	pap.removeAll();
+		    	pap.add(operations);
+		    	pap.add(panelcic);
+		    	pap.revalidate();
+		    	pap.repaint();
+		    	frame.add(pap);
+				frame.revalidate();
+				frame.repaint();
+			//	return;
+			
+			
+			} catch (SQLException ee) {
+				// TODO Auto-generated catch block
+				ee.printStackTrace();
+			}
+        
+        
+        }
+
+        @Override
+        public void changedUpdate(DocumentEvent e) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+	
+
+    });
+	
+			
+			
+			
+getBul().addActionListener(new ActionListener() {
+	
+	@Override
+	public void actionPerformed(ActionEvent arg0) {
+		// TODO Auto-generated method stub
+		istinalaz.clearSelection();
+	dugmici.clear();
+	int a = 0;
+	svikodovi.clear();
+	istinalaz.clearSelection();
+	for(int j=0;j<tabela.getAttributes().size();j++) {
+	svikodovi.add(tabela.getAttributes().get(j).getCode());
+	}
+		glavniPanel.removeAll();
+		  JPanel pan = new JPanel();
+  ta = t;
+			pan.setLayout(new BoxLayout(pan, BoxLayout.Y_AXIS));
+			for(int i=0;i<t.getColumnCount();i++) {
+				for(int j=0;j<tabela.getAttributes().size();j++) {
+					if((t.getColumnName(i).equals(tabela.getAttributes().get(j).getName())) && tabela.getAttributes().get(j).getType().equals("boolean")) {
+		
+				JCheckBox l = new JCheckBox(t.getColumnName(i));
+				a++;
+				l.setSelected(false);
+				l.setName(t.getColumnName(i));
+			    l.addActionListener(new  ActionListener() {
+					
+					@Override
+					public void actionPerformed(ActionEvent e) {
+				istinalaz.clearSelection();
+						// TODO Auto-generated method stub
+						if(l.isSelected()) {
+							for(int i=0;i<dugmici.size();i++) {
+								if(dugmici.get(i).getName().equals(l.getName())) {
+									flag=1;
+									break;
+								}
+							}
+							if(flag!=1) {
+								dugmici.add(l);
+							}
+							
+						}
+						else if(!l.isSelected()) {
+							
+							for(int i=0;i<dugmici.size();i++) {
+								if(dugmici.get(i).getName().equals(l.getName())) {
+									dugmici.remove(i);
+								}
+							}
+							
+						}
+						for(int i=0;i<dugmici.size();i++) {
+							System.out.println(dugmici.get(i).getName());
+						}
+					}
+			    });
+				pan.add(l);
+					
+			}
+		 glavniPanel.add(p3,BorderLayout.NORTH);
+		 glavniPanel.add(pan,BorderLayout.CENTER);
+		 if(a!=0)
+		 glavniPanel.add(srednjiBool,BorderLayout.SOUTH);
+		glavniPanel.revalidate();
+		glavniPanel.repaint();
+		
+	}}
+			
+			try {
+				Connection conn = DriverManager.getConnection("jdbc:jtds:sqlserver://147.91.175.155/psw-2018-tim2-4","psw-2018-tim2-4","tim2-413090834");
+				String query = "select * from "+imeTabele + ";";
+				System.out.println(query);
+				
+				
+				PreparedStatement pstmt = conn.prepareStatement(query);
+	            ResultSet rset = pstmt.executeQuery();
+				
+				int brojac=0;
+				while(rset.next()) {
+					brojac++;
+				}
+				rset = pstmt.executeQuery();
+				//System.out.println(brojac);
+				//provera da li ima podataka u resultset-u
+				if(!rset.isBeforeFirst()) {
+					System.out.println("Nema podataka");
+				}
+				
+				int brPar=t.getColumnCount();
+				Object[][] data=new Object[brojac][brPar];
+
+				int brojac2=0;
+				while(rset.next()) {
+					for(int i=0;i<brPar;i++) {
+						data[brojac2][i]=rset.getString(i+1);
+					}
+					brojac2++;
+				}
+				
+				rset.close();
+				pstmt.close();
+				
+				 ta = new JTable(data, names);
+				  p2.add(text);
+					 p2.add(getNum());
+					
+					 p2.add(getBul());
+					 p2.add(getDate());
+					 p3.add(p1, BorderLayout.NORTH);
+					 p3.add(p2,BorderLayout.SOUTH);
+					 glavniPanel.add(p3,BorderLayout.NORTH);
+
+
+					
+					
+						getPa2().removeAll();
+						getPa2().add(glavniPanel);
+						getPa2().revalidate();
+						getPa2().repaint();
+					panelcic.removeAll();
+					panelcic.setPreferredSize(new Dimension(800, 800));
+					panelcic.setLayout(new BorderLayout());
+					panelcic.add(getPa2(),BorderLayout.NORTH);
+				
+					
+				
+			    	frame.setPreferredSize(new Dimension(800, 800));
+			    	
+
+			    
+			    	scrollPane.setViewportView(ta);
+			    	scrollPane.revalidate();
+			    	scrollPane.repaint();
+			    	
+			    	panelcic.add(scrollPane,BorderLayout.CENTER);
+			    	panelcic.revalidate();
+			    	panelcic.repaint();
+			    	pap.removeAll();
+			    	pap.add(operations);
+			    	pap.add(panelcic);
+			    	pap.revalidate();
+			    	pap.repaint();
+			    	frame.add(pap);
+					frame.revalidate();
+					frame.repaint();
+				//	return;
+				
+				
+				} catch (SQLException ee) {
+					// TODO Auto-generated catch block
+					ee.printStackTrace();
+				}
+	
+	}
+});
+
+			
+		    ButtonGroup grupa = new ButtonGroup();
+		    grupa.add(getText());
+		    grupa.add(getNum());
+		    grupa.add(getBul());
+		    grupa.add(getDate());
+		    grupa.clearSelection();
+		    p2.add(text);
+			 p2.add(getNum());
+			
+			 p2.add(getBul());
+			 p2.add(getDate());
+			 p3.add(p1, BorderLayout.NORTH);
+			 p3.add(p2,BorderLayout.SOUTH);
+			 glavniPanel.add(p3,BorderLayout.NORTH);
+
+
+			
+			
+				getPa2().removeAll();
+				getPa2().add(glavniPanel);
+				getPa2().revalidate();
+				getPa2().repaint();
+			panelcic.removeAll();
+			panelcic.setPreferredSize(new Dimension(800, 800));
+			panelcic.setLayout(new BorderLayout());
+			panelcic.add(getPa2(),BorderLayout.NORTH);
+		    
+			
+		
+
+		
+	    	frame.setPreferredSize(new Dimension(800, 800));
+	    	
+
+	    
+	    	scrollPane.setViewportView(ta);
+	    	scrollPane.revalidate();
+	    	scrollPane.repaint();
+	    	
+	    	panelcic.add(scrollPane,BorderLayout.CENTER);
+	    	panelcic.revalidate();
+	    	panelcic.repaint();
+	      //	frame.removeAll();
+	    	pap.add(operations);
+	    	pap.add(panelcic);
+	    	
+	    	frame.add(pap);
+			frame.revalidate();
+			frame.repaint();
+			
+
+//			search.revalidate();
+//			search.repaint();
+			frame.pack();
+		//	frame.setDefaultCloseOperation(EXIT_ON_CLOSE);
+			frame.setLocationRelativeTo(null);
+		
+	    	frame.setVisible(true);
+			
+			//	westPanel.add(pa2,BorderLayout.CENTER);
+				
+//				getPa2().revalidate();
+				
+				
+	//			glavniPanel.revalidate();
+	//			glavniPanel.repaint();
+
+		 
+		 
+	 }
+	public JRadioButton getText() {
+		return text;
+	}
+	public void setText(JRadioButton text) {
+		this.text = text;
+	}
+	public JRadioButton getNum() {
+		return num;
+	}
+	public void setNum(JRadioButton num) {
+		this.num = num;
+	}
+	public JRadioButton getBul() {
+		return bul;
+	}
+	public void setBul(JRadioButton bul) {
+		this.bul = bul;
+	}
+	public JTextArea getUnos() {
+		return unos;
+	}
+	public void setUnos(JTextArea unos) {
+		this.unos = unos;
+	}
+	public JTextArea getUnosFrom() {
+		return unosFrom;
+	}
+	public void setUnosFrom(JTextArea unosFrom) {
+		this.unosFrom = unosFrom;
+	}
+	public JTextArea getUnosTo() {
+		return unosTo;
+	}
+	public void setUnosTo(JTextArea unosTo) {
+		this.unosTo = unosTo;
+	}
+	public JTable getTable() {
+		return table;
+	}
+	public void setTable(JTable table) {
+		this.table = table;
+	}
+
+	public JPanel getPa1() {
+		return pa1;
+	}
+
+	public void setPa1(JPanel pa1) {
+		this.pa1 = pa1;
+	}
+
+	public JPanel getPa2() {
+		return pa2;
+	}
+
+	public void setPa2(JPanel pa2) {
+		this.pa2 = pa2;
+	}
+
+
+
+
+
+	public JRadioButton getDate() {
+		return date;
+	}
+
+
+
+
+
+	public void setDate(JRadioButton date) {
+		this.date = date;
+	}
+
+
+
+
+
+	public JRadioButton getNumeric() {
+		return numeric;
+	}
+
+
+
+
+
+	public void setNumeric(JRadioButton numeric) {
+		this.numeric = numeric;
+	}
+
+
+
+
+
+	public JTextArea getUnesiOdDatumText() {
+		return unesiOdDatumText;
+	}
+
+
+
+
+
+	public void setUnesiOdDatumText(JTextArea unesiOdDatumText) {
+		this.unesiOdDatumText = unesiOdDatumText;
+	}
+
+
+
+
+
+	public JTextArea getUnesiDoDatumText() {
+		return unesiDoDatumText;
+	}
+
+
+
+
+
+	public void setUnesiDoDatumText(JTextArea unesiDoDatumText) {
+		this.unesiDoDatumText = unesiDoDatumText;
+	}
+
+
+
+
+
+	public ArrayList<String> getSvikodovi() {
+		return svikodovi;
+	}
+
+
+
+
+
+	public void setSvikodovi(ArrayList<String> svikodovi) {
+		this.svikodovi = svikodovi;
+	}
+	
+	
+}

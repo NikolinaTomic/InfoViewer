@@ -1,0 +1,105 @@
+package controller;
+
+import java.io.IOException;
+
+import org.json.JSONObject;
+
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import model.Paket;
+import model.Tabela;
+
+public class JSON_Parser implements Parser{
+
+	private Tabela tabela;
+
+	@Override
+	public Tabela[] parseTable(String sema) {
+		if(sema.equals("")) return null;
+		
+		System.out.println(sema);
+		
+		sema=sema.replaceAll("\\s","");
+		
+		System.out.println(sema);
+
+		String[] parts = sema.split("\"");
+		
+		int num=0;
+		
+		for(int i=0; i<parts.length;i++)
+		{
+			if(parts[i].equals("attributes")) num++;
+		}
+		
+		System.out.println(num);
+					
+		ObjectMapper objectMapper = new ObjectMapper();
+		objectMapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
+		objectMapper.configure(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT, true);
+		objectMapper.configure(DeserializationFeature.ACCEPT_EMPTY_ARRAY_AS_NULL_OBJECT, true);
+		Tabela[] tabela=null;
+		
+		try {
+			tabela = objectMapper.readValue(sema, Tabela[].class);
+		} catch (JsonParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JsonMappingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		for(int i=0;i<tabela.length;i++)
+		{
+			System.out.println(tabela[i]);
+		}
+		
+		
+		return tabela;
+		
+		
+	}
+
+	@Override
+	public Paket[] parsePaketi(String sema) {
+		
+		if(sema.equals("")) return null;
+		
+		ObjectMapper objectMapper = new ObjectMapper();
+		objectMapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
+		objectMapper.configure(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT, true);
+		objectMapper.configure(DeserializationFeature.ACCEPT_EMPTY_ARRAY_AS_NULL_OBJECT, true);
+		Paket[] car=null;
+		
+		try {
+			car = objectMapper.readValue(sema, Paket[].class);
+		} catch (JsonParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JsonMappingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		for(int i=0;i<car.length;i++)
+		{
+			System.out.println(car[i]);
+		}
+		
+		
+		return car;
+	}
+		
+	
+	
+}

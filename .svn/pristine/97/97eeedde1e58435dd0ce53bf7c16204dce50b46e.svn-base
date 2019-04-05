@@ -1,0 +1,71 @@
+package model;
+
+import java.util.ArrayList;
+
+import model.Atributi;
+import model.Relacija;
+
+public class Tabela {
+	
+	private String title;
+	private ArrayList<String> parent;
+	private String paket;
+	private ArrayList<Atributi> attributes;
+	private ArrayList<Strani_kljuc> foreign_keys;
+	private ArrayList<String> key;
+	private ArrayList<Relacija> relations;
+	
+	
+	public String getTitle() {
+		return title;
+	}
+	public void setTitle(String title) {
+		this.title = title;
+	}
+	public ArrayList<Atributi> getAttributes() {
+		return attributes;
+	}
+	public void setAttributes(ArrayList<Atributi> attributes) {
+		this.attributes = attributes;
+	}
+	public ArrayList<String> getKey() {
+		return key;
+	}
+	public void setKey(ArrayList<String> key) {
+		this.key = key;
+	}
+	public ArrayList<Relacija> getRelations() {
+		return relations;
+	}
+	public void setRelations(ArrayList<Relacija> relations) {
+		this.relations = relations;
+	}
+	public ArrayList<String> getParent() {
+		return parent;
+	}
+	public void setParent(ArrayList<String> parent) {
+		this.parent = parent;
+	}
+	
+	public String getPaket() {
+		return paket;
+	}
+	public void setPaket(String paket) {
+		this.paket = paket;
+	}
+	@Override
+	public String toString() {
+		return "Tabela [title=" + title + ", parent=" + parent + ", paket=" + paket + ", attributes=" + attributes
+				+ ", key=" + key + ", relations=" + relations + "]";
+	}
+	public ArrayList<Strani_kljuc> getForeign_keys() {
+		return foreign_keys;
+	}
+	public void setForeign_keys(ArrayList<Strani_kljuc> foreign_keys) {
+		this.foreign_keys = foreign_keys;
+	}
+	
+	
+	
+
+}

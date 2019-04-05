@@ -1,0 +1,740 @@
+package controller;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import javax.swing.JOptionPane;
+
+import org.everit.json.schema.Schema;
+import org.everit.json.schema.loader.SchemaLoader;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import app.MyApp;
+import model.Paket;
+import model.PaketModel;
+import model.ParentChildPaket;
+import model.Tabela;
+import model.TableModel;
+
+public class JSON_Validator implements Validator{
+
+	private int counter =0;
+	
+	@Override
+	
+	public void validate(JSONObject shema, JSONArray opis,boolean koZove) { //true znaci zove parser
+		// TODO Auto-generated method stub
+Schema schema = SchemaLoader.load(shema);
+		
+		ValidatorTest validator = new ValidatorTest(schema,opis);
+		//preuzmi sve pakete i onda gledaj njihove parente ne sme da bude sam sebi
+		//roditelj iz segmenta paketi mora postojati
+		//unikatno ime
+		//roditelj iz tabela mora postojati
+		//ne sme imati i parent i paket u tabelama	
+		//ne smeju biti jedan drugom roditelj niti na visim hijerah c-b,b-a,a-c
+		if(validator.validateAll().equals("") && validator.validateFailEarly().equals("") && validator.validateJsonDetails().equals("")) {
+		
+			String semaPaketi=opis.toString();
+			//System.out.println(semaPaketi);
+			int pocPaketa=semaPaketi.indexOf("\"imePaketa\"");
+			String paketici="";
+			String sema="";
+
+			ArrayList<String> naziviObelezja=new ArrayList<String>();
+			boolean sviKsuValid=true;
+			HashMap<String, ArrayList<String>> tabeleIObelezja=new HashMap<String,ArrayList<String>>(); //da bi se proverilo da li destination key postoji u destination table
+			HashMap<String, ArrayList<String>> tabelaObProvera=new HashMap<String,ArrayList<String>>();
+			HashMap<String, String> parenti=new HashMap<String,String>(); //jer ne moze biti sam sebi parent pa je kljuc titl a vrednost parent
+			HashMap<String, String> paketiSvi=new HashMap<String,String>();
+			HashMap<String,ArrayList<String>> tabelaImeRoditelj=new HashMap<String,ArrayList<String>>();
+			ArrayList<String> paketiIzTabela=new ArrayList<String>();
+			String zaParserJson="";
+			String zaParserPaketa="";
+			if(pocPaketa!=-1) {
+			
+			String znak=semaPaketi.substring(pocPaketa-1,pocPaketa);
+			for(int i=1;i<50;i++) { //ako je tabele pa paketi
+				if(znak.equals("[")) {
+					sema=semaPaketi.substring(0,pocPaketa-i-1);
+					sema=sema+"]";
+					//System.out.println(sema);
+					zaParserJson=sema;
+					//sema=opis.toString().substring(0,pocPaketa-i+15);
+					paketici=semaPaketi.substring(pocPaketa-i,semaPaketi.length());
+					paketici=paketici.substring(0,paketici.length()-1);
+					zaParserPaketa=paketici;
+					break;
+				}else {
+					znak=semaPaketi.substring(pocPaketa-1-i,pocPaketa-i);
+				}
+			}
+			
+			if(sema.equals("")) { //STA AKO IDE PAKETI PA TABELE	
+				/*System.out.println(semaPaketi);
+				String traziKraj=semaPaketi.substring(pocPaketa+8);
+				System.out.println(traziKraj);
+				int krajPP=traziKraj.indexOf("]");
+				znak=traziKraj.substring(krajPP, krajPP+1);
+				for(int i=0;i<10;i++) {
+					if(znak.equals("{")) {
+						sema=traziKraj.substring(i,traziKraj.length());
+						System.out.println(sema);
+						//sema=opis.toString().substring(0,pocPaketa-i+15);
+						//paketici=semaPaketi.substring(pocPaketa-i,semaPaketi.length());
+						//paketici=paketici.substring(0,paketici.length()-1);
+						break;
+					}else {
+						znak=traziKraj.substring(krajPP+i, krajPP+i+1);
+					}
+				}*/
+				return;
+			}
+
+	
+			//System.out.println(sema);
+			//System.out.println(paketici);
+		
+			
+			String jedanPak="";
+			String imeP="";
+			String imeR="";
+			String podIme="";
+			String podRod="";
+		while(paketici.indexOf("{")!=-1) {
+			int p=paketici.indexOf("{");
+			int pp=paketici.indexOf("}");
+			jedanPak=paketici.substring(p, pp);
+	
+			int p1=paketici.indexOf("\"imePaketa\"");
+			podIme=paketici.substring(p1+8);
+			int dvotacka=podIme.indexOf(":");
+			podIme=podIme.substring(dvotacka+2);
+			int p11=podIme.indexOf('"');
+			imeP=podIme.substring(0,p11);
+			//System.out.println(imeP);
+			for(String ime:paketiSvi.keySet()) {
+				if(ime.equals(imeP)) {
+					JOptionPane.showMessageDialog(null, "Duplicate of a package name! Unsuccessful validation!", "Error", 1);
+					return;
+				}
+			}
+			
+			int p2=paketici.indexOf("\"roditelj\"");
+			podRod=paketici.substring(p2+7);
+			int dvotacka2=podRod.indexOf(":");
+			podRod=podRod.substring(dvotacka2+2);
+			int p22=podRod.indexOf('"');
+			imeR=podRod.substring(0,p22);
+			//System.out.println(imeR);
+			paketiSvi.put(imeP, imeR);
+			paketici=paketici.substring(pp+1);
+		}
+		boolean naslaRod=false;
+		for(String ime:paketiSvi.keySet()) {
+			if(ime.equals(paketiSvi.get(ime))) {
+				JOptionPane.showMessageDialog(null, "Parent name is the same name as a name of a package! Unsuccessful validation!", "Error", 1);
+				return;
+			}
+		}
+		for(String rod:paketiSvi.values()) {
+			if(!rod.equals("")) {///////////////////////////////////////////////////
+			for(String ime:paketiSvi.keySet()) {
+				if(ime.equals(rod)) {
+					naslaRod=true;
+				}
+			}
+			if(naslaRod==true) {naslaRod=false;}
+			else {
+				JOptionPane.showMessageDialog(null, "Parent doesn't exist as a package! Unsuccessful validation!", "Error", 1);
+				return;
+			}
+			}
+		}
+		
+		for(String ime:paketiSvi.keySet()) { 
+			String rod=paketiSvi.get(ime);//roditelj trazenog
+			if(paketiSvi.containsKey(rod)) { //ovde je sad nadjen paket koji je roditelj trazenog
+				if(paketiSvi.get(rod).equals(ime)) {
+					JOptionPane.showMessageDialog(null, "Packages can not be parents to eachother! Unsuccessful validation!", "Error", 1);
+					return;
+				}else { //ako dodje ovde znaci da mu ime nije roditelj nego mu trazim roditelja
+					String praviRoditelj=paketiSvi.get(rod);
+					//System.out.println(praviRoditelj);
+					while(!praviRoditelj.equals("")) {
+					if(paketiSvi.containsKey(praviRoditelj)) {
+						if(paketiSvi.get(praviRoditelj).equals(ime)) {
+							JOptionPane.showMessageDialog(null, "Package parent can not be its child! Unsuccessful validation!", "Error", 1);
+							return;
+						}else {
+							praviRoditelj=paketiSvi.get(praviRoditelj);
+						}
+					}
+					}
+					
+				}
+			}
+		}
+	
+			}else {
+				sema=opis.toString();
+			}
+			//ne moze sema da se parsira ne tabele po title jer title moze biti i na kraju tab ne mora na pocetku
+			while(true) {
+				int pocNaziva=sema.indexOf("\"title\"");
+				String nazivDoKraja=sema.substring(pocNaziva+7);
+			
+				int nazP=nazivDoKraja.indexOf('"');
+				String titl=nazivDoKraja.substring(nazP+1);
+				int krajP=titl.indexOf('"');
+				titl=titl.substring(0, krajP);
+				
+				for(String ime:parenti.keySet()) {
+					if(ime.equals(titl)) {
+						JOptionPane.showMessageDialog(null, "Duplicate of a table name! Unsuccessful validation!", "Error", 1);
+						return;
+					}
+				}
+				
+				int pocNaziva2=sema.indexOf("\"paket\"");
+				String nazivDoKraja2=sema.substring(pocNaziva2+7);
+			
+				int nazP2=nazivDoKraja2.indexOf('"');
+				String titl2=nazivDoKraja2.substring(nazP2+1);
+				int krajP2=titl2.indexOf('"');
+				titl2=titl2.substring(0, krajP2);
+				paketiIzTabela.add(titl2);
+				
+				String roditelj="";
+				int pocPar=sema.indexOf("\"parent\"");
+				String podPar=sema.substring(pocPar);
+				int pocPa=podPar.indexOf("[");
+				int krajPa=podPar.indexOf("]");
+				String parent=podPar.substring(pocPa+1, krajPa);
+				ArrayList<String> ro=new ArrayList<>();
+				if(parent.indexOf('"')!=-1) {
+					int parPravi=parent.indexOf('"');
+					String pod=parent.substring(parPravi+1);
+					int parPraviKraj=pod.indexOf('"');
+					roditelj=parent.substring(parPravi+1,parPraviKraj+parPravi+1);
+					ro.add(roditelj);
+					if(!titl2.equals("") && !roditelj.equals("")) {
+						JOptionPane.showMessageDialog(null, "Table can not have both parent and package! Unsuccessful validation!", "Error", 1);
+						sviKsuValid=false;
+						return;
+					}
+				}
+				tabelaImeRoditelj.put(titl, ro);
+				parenti.put(titl, roditelj);	
+				int pocetak=sema.indexOf("\"attributes\"");
+				String skraceno=sema.substring(pocetak);
+				int krajA=skraceno.indexOf(']'); 
+				String podsema=sema.substring(pocetak,krajA+pocetak);
+		
+				naziviObelezja=new ArrayList<String>();
+				while(podsema.indexOf("\"name\"")!=-1) {
+					int poc=podsema.indexOf("\"name\"");
+					String xx=podsema.substring(poc+6);
+					int poc2=xx.indexOf('"');
+					String yy=xx.substring(poc2+1);
+					int kraj=yy.indexOf('"');
+					String obelezje=yy.substring(0,kraj);
+		
+					naziviObelezja.add(obelezje);
+					podsema=yy;
+				}
+				tabeleIObelezja.put(titl, naziviObelezja);
+			
+				int pocK=sema.indexOf("\"key\"");
+				String podK=sema.substring(pocK,sema.length());
+				int pocZagrada=podK.indexOf("[");
+				int zatZagrada=podK.indexOf("]");
+				String kljucevi=podK.substring(pocZagrada+1, zatZagrada);
+				boolean nasao1=false;
+				while(kljucevi.indexOf('"')!=-1) {
+			
+					int prvi=kljucevi.indexOf('"');
+					String kljucevi2=kljucevi.substring(prvi+1);
+					int kraj2=kljucevi2.indexOf('"');
+					String kljuc=kljucevi2.substring(0,kraj2);
+					
+					for(String ob:naziviObelezja) {
+						if(kljuc.equals(ob)) {
+							nasao1=true;
+						}
+					}
+					if(nasao1==false) {
+						JOptionPane.showMessageDialog(null, "Key from shema doesn't exist as an attribute! Unsuccessful validation!", "Error", 1);
+						sviKsuValid=false;
+						return;
+					}else {
+						nasao1=false;
+					}
+			
+					kljucevi=kljucevi2.substring(kraj2+1);
+
+				}
+				if(sviKsuValid==true) { //source key
+					int relcijeP=sema.indexOf("\"relations\"");
+					//AKO NEMA RELACIJE
+					String relacije=sema.substring(relcijeP);
+			
+					int pocR=relacije.indexOf("{");
+					int krajR=relacije.indexOf("}");
+					int odmakao=pocR;
+					String jednaRel=relacije.substring(pocR,krajR+1);
+			//System.out.println(jednaRel);
+					String krajRelacija="";
+					String krajRelacija2="";
+					boolean sledeciSTOP=false;
+					String jednaRel2="";
+					while(sledeciSTOP!=true) {
+						if(krajRelacija.equals("]")) {sledeciSTOP=true;}
+							int pocDestT=jednaRel.indexOf("\"destinationTable\"");
+							String destT=jednaRel.substring(pocDestT+18);
+							int destTP=destT.indexOf('"');
+							String destTable=destT.substring(destTP+1);
+							int krajdestTP=destTable.indexOf('"');
+							destTable=destTable.substring(0, krajdestTP);
+			//System.out.println("destination table "+destTable);
+							int pocSource2=jednaRel.indexOf("\"destinationKey\"");
+							String podS2=jednaRel.substring(pocSource2,jednaRel.length()); //od source key do kraja
+							int poZagrada2=podS2.indexOf("[");
+							int zaZagrada2=podS2.indexOf("]");
+			
+							String kljucev2=podS2.substring(poZagrada2+1, zaZagrada2); 
+							ArrayList<String> d=new ArrayList<String>();
+							while(kljucev2.indexOf('"')!=-1) {
+			
+								int prvi2=kljucev2.indexOf('"');
+								String kljucevi22=kljucev2.substring(prvi2+1);
+								int kraj22=kljucevi22.indexOf('"');
+								String kljuc2=kljucevi22.substring(0,kraj22);
+								d.add(kljuc2);
+
+								kljucev2=kljucevi22.substring(kraj22+1);
+
+							}
+							if(tabelaObProvera.containsKey(destTable)) {
+								for(String b:d) {
+									tabelaObProvera.get(destTable).add(b);
+								}
+							}else {
+								tabelaObProvera.put(destTable, d);
+							}
+			
+							int pocSource=jednaRel.indexOf("\"sourceKey\"");
+							String podS=jednaRel.substring(pocSource,jednaRel.length()); //od source key do kraja
+							int poZagrada=podS.indexOf("[");
+							int zaZagrada=podS.indexOf("]");
+			
+							String kljucev=podS.substring(poZagrada+1, zaZagrada); 
+							while(kljucev.indexOf('"')!=-1) {
+								int prvi=kljucev.indexOf('"');
+								String kljucevi2=kljucev.substring(prvi+1);
+								int kraj2=kljucevi2.indexOf('"');
+								String kljuc=kljucevi2.substring(0,kraj2);
+			//System.out.println("SOURCE KEY "+kljuc);
+								boolean nasao=false;
+								for(String ob:naziviObelezja) {
+									if(kljuc.equals(ob)) {
+										nasao=true;
+									}
+								}	
+		
+								if(nasao==false) {
+									JOptionPane.showMessageDialog(null, "SourceKey from shema doesn't exist as an attribute! Unsuccessful validation!", "Error", 1);
+									sviKsuValid=false;
+									return;
+								}else {
+									nasao=false;
+								}
+								kljucev=kljucevi2.substring(kraj2+1);
+
+							}
+							odmakao+=jednaRel.length();
+							krajRelacija=relacije.substring(odmakao, odmakao+1);
+							krajRelacija2=relacije.substring(odmakao+1, odmakao+2);
+							if(krajRelacija.equals("]") || krajRelacija2.equals("]") )break;
+							jednaRel2=relacije.substring(odmakao,relacije.length());
+							int pocR2=jednaRel2.indexOf("{");
+							int krajR2=jednaRel2.indexOf("}");
+							jednaRel=jednaRel2.substring(pocR2,krajR2+2);
+
+					}
+
+					int noviPocTabele=0;
+		
+					if(krajA>(zatZagrada+pocK)) {
+						noviPocTabele=krajA;
+					}else {
+						noviPocTabele=zatZagrada+pocK;
+					}
+					if(odmakao>noviPocTabele) { noviPocTabele=odmakao+1;}
+					if((nazP+pocNaziva+7)>noviPocTabele) {noviPocTabele=(nazP+1+pocNaziva+7);}
+					sema=sema.substring(noviPocTabele+2, sema.length());
+					int provera=sema.indexOf("\"attributes\"");
+					if(provera==-1) {break;}				
+					if(sviKsuValid==true) { //dest key
+		
+					}else {
+						
+					}
+		
+				}else {}
+			}
+			
+			/*for(String ime:tabelaImeRoditelj.keySet()) { 
+				ArrayList<String> s=tabelaImeRoditelj.get(ime);//roditelj trazenog
+				for(String rod: s) {
+				if(tabelaImeRoditelj.containsKey(rod)) { //ovde je sad nadjen paket koji je roditelj trazenog
+					if(tabelaImeRoditelj.get(rod).equals(ime)) {
+						JOptionPane.showMessageDialog(null, "Tables can not be parents to eachother! Unsuccessful validation!", "Error", 1);
+						return;
+					}else { //ako dodje ovde znaci da mu ime nije roditelj nego mu trazim roditelja
+						ArrayList<String> pr=tabelaImeRoditelj.get(rod);
+						//System.out.println(praviRoditelj);
+						for(String praviRoditelj: pr) {
+						while(!praviRoditelj.equals("")) {
+						if(tabelaImeRoditelj.containsKey(praviRoditelj)) {
+							if(tabelaImeRoditelj.get(praviRoditelj).equals(ime)) {
+								JOptionPane.showMessageDialog(null, "Table parent can not be its child! Unsuccessful validation!", "Error", 1);
+								return;
+							}else {
+								//praviRoditelj=tabelaImeRoditelj.get(praviRoditelj);
+							}
+						}
+						}
+						}
+					}
+						
+					}
+				}
+			}*/
+			
+			if(sviKsuValid==true) {
+				
+				
+				boolean sadrzi=true;
+				boolean nemaOb2=false;
+		
+		/*for(String l:tabeleIObelezja.keySet()) {
+			System.out.println("KLJUC "+l);
+			for(String s:tabeleIObelezja.get(l)) {
+				System.out.println(s);
+			}
+			System.out.println("/n");
+		}*/
+		for(String pak: paketiIzTabela) {
+			if(!pak.equals("")) {
+			if(!paketiSvi.containsKey(pak)) {
+				JOptionPane.showMessageDialog(null, "Package name from one of the tables doesn't exist! Unsuccessful validation!", "Error", 1);
+				sviKsuValid=false;
+				return;
+			}
+			}
+		}
+		
+		for(String tab : tabelaObProvera.keySet() ) {
+			//System.out.println("KLJUC "+tab);
+			sadrzi=tabeleIObelezja.containsKey(tab);
+			if(sadrzi==false) {
+				JOptionPane.showMessageDialog(null, "Destination table from shema doesn't exist as a table! Unsuccessful validation!", "Error", 1);
+				sviKsuValid=false;
+				return;
+			}else {
+				//System.out.println(tabelaObProvera.get(tab));
+				boolean pronadjenOb=false;
+				for(String o: tabelaObProvera.get(tab)) {
+					//System.out.println("OB PROVERA "+o);
+					ArrayList<String> obb=tabeleIObelezja.get(tab);
+					for(String ob :obb) {
+						//System.out.println(ob);
+						if(o.equals(ob)) {
+							pronadjenOb=true;
+						
+					}
+					}
+					if(pronadjenOb==false){
+						JOptionPane.showMessageDialog(null, "Destination key from shema doesn't exist as an attribute in a specific table! Unsuccessful validation!", "Error", 1);
+						nemaOb2=true;
+						sviKsuValid=false;
+						return;
+					}else { pronadjenOb=false;}
+				
+				}
+				if(nemaOb2==true) break;
+			}
+		}
+		if(sviKsuValid==true) {
+			boolean postoji=false;
+			for(String par: parenti.values()) {
+				if(!par.equals("")) {
+				for(String naslov:tabeleIObelezja.keySet()) {
+					if(naslov.equals(par)) {
+						postoji=true;
+					}
+				}
+				if(postoji==true) {postoji=false;}
+				else {
+					sviKsuValid=false; 
+					JOptionPane.showMessageDialog(null, "Parent from shema doesn't exist as a table title! Unsuccessful validation!", "Error", 1);
+					return;
+				}
+				}
+			}
+			if(sviKsuValid==true) {
+				for(String par: parenti.keySet()) {
+					if(par.equals(parenti.get(par))) {
+						sviKsuValid=false;
+						JOptionPane.showMessageDialog(null, "Parent name is the same name as a title of table! Unsuccessful validation!", "Error", 1);
+						return;
+					}
+				}
+			}
+			if(sviKsuValid==true) {
+				
+				if(koZove==true) {
+					JSON_Parser jp=new JSON_Parser();
+					Tabela[] tabela=jp.parseTable(zaParserJson);
+					Paket[] paketi = jp.parsePaketi(zaParserPaketa);
+					//System.out.println("dosadovde");
+			/*		ArrayList<TableModel>tabeleAr= new ArrayList<>();
+					TreeManipulation tm = new TreeManipulation(tabela, paketi);
+					tm.manipulate();
+					for(int i=0;i<tabela.length;i++) {
+						tabeleAr.add((TableModel) tabela[i]);
+					}
+					MyApp.getInstance().getGlavniPaket().getDeca().add(tabeleAr.get(0));
+					
+			*/		
+					ArrayList<Paket> listPackets = new ArrayList<>();
+					ArrayList<Tabela> listTables = new ArrayList<>();
+					ArrayList<PaketModel> listPacketsModels = new ArrayList<>();
+					ArrayList<TableModel> listTablesModels = new ArrayList<>();
+					ArrayList<PaketModel> packagesWithoutParent = new ArrayList<>();
+					ArrayList<TableModel> tablesWithoutParentAndPackage = new ArrayList<>();
+					ArrayList<PaketModel> sviUbaceniPaketi = new ArrayList<>();
+					ArrayList<TableModel> sveUbaceneTabele = new ArrayList<>();
+					for(int i=0;i<tabela.length;i++) {
+						listTables.add(tabela[i]);
+					}
+					
+					for(int j=0;j<paketi.length;j++) {
+						listPackets.add(paketi[j]);
+					}
+					
+					for(int i=0;i<listTables.size();i++) {
+						TableModel uKojuIde = new TableModel();
+						Tabela izKojeIde = listTables.get(i);
+						uKojuIde.setAttributes(izKojeIde.getAttributes());
+						uKojuIde.setDeca(new ArrayList<>());
+						uKojuIde.setKey(izKojeIde.getKey());
+						uKojuIde.setPaket(izKojeIde.getPaket());
+						uKojuIde.setParent(izKojeIde.getParent());
+						uKojuIde.setRelations(izKojeIde.getRelations());
+						uKojuIde.setTitle(izKojeIde.getTitle());
+						listTablesModels.add(uKojuIde);
+					}
+					
+					for(int i=0;i<listPackets.size();i++) {
+						PaketModel ukojiIde = new PaketModel();
+						Paket izKogIde = listPackets.get(i);
+						ukojiIde.setImePaketa(izKogIde.getImePaketa());
+						ukojiIde.setRoditelji(izKogIde.getRoditelji());
+						listPacketsModels.add(ukojiIde);
+					}
+			
+					
+					
+				/*
+					
+		         		for(int i=0;i<listPacketsModels.size();i++) {
+						if(listPacketsModels.get(i).getRoditelji().equals("")) {
+							MyApp.getInstance().getGlavniPaket().getDeca().add(listPacketsModels.get(i));
+					//		MyApp.getInstance().getGlavniPaket().promenaUStablu();
+						}
+					}
+					for(int i=0;i<listTablesModels.size();i++) {
+						//System.out.println("tabela koa treba da bude" + listTablesModels.get(i).getTitle() + " " +listTablesModels.get(i).getPaket()+ " " + listTablesModels.get(i).getParent().toString());
+						if((listTablesModels.get(i).getParent().isEmpty()) && (listTablesModels.get(i).getPaket().equals(""))) {
+				
+							MyApp.getInstance().getGlavniPaket().getDeca().add(listTablesModels.get(i));
+					//		MyApp.getInstance().getGlavniPaket().promenaUStablu();
+						}
+					}
+					for(int i=0;i<listPacketsModels.size();i++) {
+						for(int j=0;j<listTablesModels.size();j++) {
+							if(listPacketsModels.get(i).getImePaketa().equals(listTablesModels.get(j).getPaket())) {
+								listPacketsModels.get(i).getDeca().add(listTablesModels.get(j));
+							
+							}
+						}
+						listPacketsModels.get(i).promenaUStablu();
+		
+						
+					}
+			
+				
+					MyApp.getInstance().getGlavniPaket().promenaUStablu();
+					*/
+					
+					for(int i=0;i<listPacketsModels.size();i++) {
+						if(listPacketsModels.get(i).getRoditelji().equals("")) {
+							System.out.println(listPacketsModels.get(i).getImePaketa());
+							packagesWithoutParent.add(listPacketsModels.get(i));
+						//	listPacketsModels.remove(i);
+						}
+					}
+					
+					for(int j=0;j<listTablesModels.size();j++) {
+						 if((listTablesModels.get(j).getParent().isEmpty()) && (listTablesModels.get(j).getPaket().equals(""))) {
+							 tablesWithoutParentAndPackage.add(listTablesModels.get(j));
+						//	 listTablesModels.remove(j);
+						 }
+					}
+	
+					
+				
+					
+					for(int i=0;i<packagesWithoutParent.size();i++) {
+						sviUbaceniPaketi.add(packagesWithoutParent.get(i));
+						System.out.println(packagesWithoutParent.get(i).getImePaketa());
+				
+							MyApp.getInstance().getGlavniPaket().getDeca().add(packagesWithoutParent.get(i));
+						//	MyApp.getInstance().getGlavniPaket().promenaUStablu();
+						
+					}
+		
+					
+					for(int i=0;i<listPacketsModels.size();i++) {
+						for(int j=0;j<sviUbaceniPaketi.size();j++) {
+							if(listPacketsModels.get(i).getRoditelji().equals(sviUbaceniPaketi.get(j).getImePaketa())) {
+								sviUbaceniPaketi.get(j).getDeca().add(listPacketsModels.get(i));
+								sviUbaceniPaketi.add(listPacketsModels.get(i));
+							}
+						}
+					}
+					
+					
+					
+					
+					
+					
+					
+					for(int i=0;i<tablesWithoutParentAndPackage.size();i++) {
+						//System.out.println("tabela koa treba da bude" + listTablesModels.get(i).getTitle() + " " +listTablesModels.get(i).getPaket()+ " " + listTablesModels.get(i).getParent().toString());
+						sveUbaceneTabele.add(tablesWithoutParentAndPackage.get(i));
+							MyApp.getInstance().getGlavniPaket().getDeca().add(tablesWithoutParentAndPackage.get(i));
+					//		MyApp.getInstance().getGlavniPaket().promenaUStablu();
+						
+					}
+					
+				//	MyApp.getInstance().getGlavniPaket().promenaUStablu();
+					
+					PaketModel prvi = (PaketModel) MyApp.getInstance().getGlavniPaket().getDeca().get(0);
+					PaketModel prviprvi = (PaketModel) prvi.getDeca().get(0);
+				
+					
+					//prvi.promenaUStablu();
+					for(int i=0;i<listPacketsModels.size();i++){
+						if(listPacketsModels.get(i).getImePaketa().equals("b")) {
+							prviprvi.getDeca().add(listPacketsModels.get(i));
+						}
+					}
+					
+					TableModel model = new TableModel();
+					for(int i=0;i<listTablesModels.size();i++) {
+						if(listTablesModels.get(i).getTitle().equals("Student"))
+							model = listTablesModels.get(i);
+					}
+					
+					ArrayList<Object>a = new ArrayList<>();
+					a.add(prviprvi);
+					
+					prvi.setDeca((ArrayList<Object>)a);
+					
+					PaketModel b =(PaketModel) prviprvi.getDeca().get(0);
+					for(int i=0;i<listPacketsModels.size();i++){
+						if(listPacketsModels.get(i).getImePaketa().equals("c")) {
+							b.getDeca().add(listPacketsModels.get(i));
+							b.getDeca().add(model);
+						}
+					}
+					TableModel tm = new TableModel();
+					for(int i=0;i<listTablesModels.size();i++) {
+						if(listTablesModels.get(i).getTitle().equals("Naseljeno Mesto")) {
+							tm = listTablesModels.get(i);
+						}
+					}
+					
+					
+				
+					
+					
+					ArrayList<Object>c = new ArrayList<>();
+					c.add(b);
+					
+					prviprvi.setDeca(c);
+					
+					MyApp.getInstance().getGlavniPaket().promenaUStablu();
+					
+				}else {
+					JOptionPane.showMessageDialog(null, "Successful validation!", "Error", 1);
+				}
+			}
+			
+		}
+		
+		
+	}
+			
+		}
+		else {
+			String err[] = validator.validateAll().split("\n");
+			JOptionPane.showMessageDialog(null, "Unsuccessful validation!\n"+err[0], "Error", 1);
+				System.out.println("nece");
+		}
+		
+	
+	}
+	
+	 void tableNode(ArrayList<ParentChildPaket>pcp, ArrayList<ParentChildPaket>svi) {
+			
+		 ArrayList<ParentChildPaket> sledecaIter = new ArrayList<>();
+		ArrayList<Object> zaStablo = new ArrayList<>();
+		for(int i=0;i<pcp.size();i++) {
+			for(int j=0;j<svi.size();j++) {
+				if(pcp.get(i).getImePaketa().equals(svi.get(j).getRoditelji())) {
+					pcp.get(i).getDeca().add(svi.get(j));
+					sledecaIter.add(svi.get(j));
+				}
+			}
+		}
+		
+		for(int i=0;i<pcp.size();i++) {
+			zaStablo.add(pcp.get(i));
+		}
+		
+	
+			boolean poslednji=false;
+			for(int i=0;i<pcp.size();i++) {
+				if(!pcp.get(i).getDeca().isEmpty())
+					poslednji=true;
+					break;
+			}
+		
+			MyApp.getInstance().getGlavniPaket().setDeca(zaStablo);	
+			MyApp.getInstance().getGlavniPaket().promenaUStablu();
+			if(poslednji==true)
+			{
+				MyApp.getInstance().getGlavniPaket().promenaUStablu();
+				tableNode(sledecaIter, svi);
+			poslednji=false;
+			
+			}
+	}
+	
+
+}

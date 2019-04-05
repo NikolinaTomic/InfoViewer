@@ -1,0 +1,74 @@
+{
+  "attributes": [
+    {
+      "code": "DRZ ",
+      "is_null": false,
+      "name": "Drzava",
+      "MaxLength": 3,
+      "is_mandatory": true,
+      "type": "string"
+    },
+    {
+      "code": "NM_PB",
+      "is_null": false,
+      "name": "Post. broj",
+      "MaxLength": 5,
+      "is_mandatory": true,
+      "type": "string"
+    },
+    {
+      "code": "NM_NAZIV",
+      "is_null": true,
+      "name": "Naziv",
+      "MaxLength": 128,
+      "is_mandatory": true,
+      "type": "string"
+    },
+    {
+      "code": "NM_STAN",
+      "is_null": true,
+      "name": "Broj stanovnika",
+      "MaxLength": 10,
+      "is_mandatory": false,
+      "type": "number"
+    },
+    {
+      "code": "NM_GRAD",
+      "is_null": true,
+      "name": "Grad",
+      "is_mandatory": true,
+      "type": "boolean"
+    }
+  ],
+  "title": "Naseljeno mesto",
+  "relations": [
+    {
+     "title": "Glavni grad",
+      "sourceKey": "Post. broj",
+      "destinationTable": "Drzava",
+      "destinationKey": "Glavni grad"
+    },
+    {
+     "title": "Pripada drzavi",
+      "sourceKey": "Drzava",
+      "destinationTable": "Drzava",
+      "destinationKey": "Oznaka"
+    },
+    {
+     "title": "Mesto rodjenja",
+      "sourceKey": "Post. broj",
+      "destinationTable": "Student",
+      "destinationKey": "Mesto rodjenja"
+    },
+    {
+     "title": "Mesto stanovanja",
+      "sourceKey": "Post. broj",
+      "destinationTable": "Student",
+      "destinationKey": "Mesto stan."
+    }
+  ],
+  "key": [
+    "Drzava",
+    "Post. broj"
+  ]
+}

@@ -1,0 +1,61 @@
+package controller;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import javax.swing.JPanel;
+import javax.swing.JTable;
+
+import app.MyApp;
+import model.Strani_kljuc;
+import model.Tabela;
+import model.TableModel;
+import view.TableView;
+
+public class Predfiltracija {
+
+	public void filtriraj(ArrayList<TableModel> listaTabela,String ime,JTable table,int w,int h) {
+			Tabela trazena=new Tabela();
+			ArrayList<TableModel> deca=new ArrayList<TableModel>();
+		    		for(TableModel t:listaTabela) { //koja je maticna tabela
+		    			if(t.getTabela().getTitle().equals(ime)) {
+		    				trazena=t.getTabela();
+		    				deca=t.getDeca();
+		    			}
+		    		}
+		    HashMap<Tabela, HashMap<String,String>> DecaskVr=new HashMap<Tabela, HashMap<String,String>>();
+		    for( TableModel tm:deca) {
+				Row row=new Row();
+				String[] columnNames = row.uzmiHeadere(trazena);
+		    	HashMap<String, String> strKljucVr=new HashMap<>();
+    			ArrayList<Strani_kljuc> strani=tm.getTabela().getForeign_keys();
+    			for(Strani_kljuc s:strani) {
+    				for(int i=0;i<columnNames.length;i++) {
+    					//nadjeno po kom se obelezju vrsi filtracija
+    					//mora se prolaziti kroz hedere iz baze
+
+    					if(s.getSourceAttribute().equals(columnNames[i])) {
+    						strKljucVr.put(s.getDestinationAttribute(), table.getModel().getValueAt(table.getSelectedRow(),i).toString()); //u mapu se ubacuje str kljuc sa vrednosti
+    						DecaskVr.put(tm.getTabela(), strKljucVr);
+    						//System.out.println("VR    "+table.getModel().getValueAt(table.getSelectedRow(),i).toString());
+    					}
+    				}
+
+    			}		
+		    	
+		    }
+		    		
+		    ArrayList<Tabela> deca2=new ArrayList<>();
+		    for(TableModel tm: deca) {
+		    	deca2.add(tm.getTabela());
+		    }
+			Row rw=new Row(); 
+    		Object[][] data=rw.konekcijaSaBazom(trazena);
+    		HashMap<Tabela, Object[][]> data2=rw.konekcijaSaBazomDecaProbrano(DecaskVr,listaTabela);
+    		TableView is=new TableView(listaTabela,trazena.getTitle(),table.getSelectedRow());
+    		JPanel pa=is.iscrtavanje(w,h,data,data2);
+    		MyApp.getInstance().addToCentralPanel2(pa);	  		
+
+		  	}
+	
+}

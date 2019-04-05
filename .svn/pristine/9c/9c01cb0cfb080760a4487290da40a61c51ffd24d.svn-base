@@ -1,0 +1,603 @@
+package view;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.LayoutManager;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
+import javax.swing.JTable;
+import javax.swing.JViewport;
+import javax.swing.ListSelectionModel;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+
+import app.MyApp;
+import controller.CRUDFactory;
+import controller.Predfiltracija;
+import controller.RemoveData;
+import controller.Row;
+import controller.SearchData;
+import model.Tabela;
+import model.TableModel;
+
+public class TableView {
+	private ArrayList<TableModel> listaTabela=new ArrayList<>();
+	private Tabela tabela=new Tabela();
+	private JScrollPane pane1 = new JScrollPane();
+	private JScrollPane pane2 = new JScrollPane(); 
+	private String ime="";
+	private boolean dete=false;
+	JPanel dugTab=new JPanel();
+	private JPanel dugTab2=new JPanel();
+	private HashMap<Tabela,Object[][]> data2=new HashMap<>();
+	JPanel osnova=new JPanel();
+	private JTabbedPane tab=new JTabbedPane();
+	private HashMap<Integer, Tabela> taboviRedom=new HashMap<>();
+	public TableView(ArrayList<TableModel> tabela,String ime) {
+		this.listaTabela=tabela;
+		this.ime=ime;
+	}
+	
+	public JPanel iscrtavanje(int w,int h,Object[][] data,HashMap<Tabela,Object[][]> data2) {
+		this.data2=data2;
+
+		Tabela ta=new Tabela();
+		for(TableModel tt:listaTabela) {
+			if(tt.getTabela().getTitle().equals(ime)) {
+				ta=tt.getTabela();
+			}
+		}
+		JPanel p=new JPanel();
+		osnova.setBackground(Color.BLACK);
+		p.setBackground(Color.BLACK);
+		osnova.setLayout(new BoxLayout(osnova, BoxLayout.Y_AXIS));
+		JButton ad=new JButton(MyApp.getInstance().getResourceBundle().getString("add"));
+		
+		JButton re=new JButton(MyApp.getInstance().getResourceBundle().getString("remove"));
+		JButton up=new JButton(MyApp.getInstance().getResourceBundle().getString("update"));
+		JButton ser=new JButton(MyApp.getInstance().getResourceBundle().getString("search"));
+		JButton dePo=new JButton(MyApp.getInstance().getResourceBundle().getString("demote")); //demote ili promote 
+		dePo.setPreferredSize(new Dimension(70,30));
+     
+		ad.setPreferredSize(new Dimension(70, 30));
+		re.setPreferredSize(new Dimension(70, 30));
+		up.setPreferredSize(new Dimension(70, 30));
+		ser.setPreferredSize(new Dimension(70, 30));
+
+		JPanel gornjiL=new JPanel();
+		gornjiL.setLayout((LayoutManager) new FlowLayout(FlowLayout.RIGHT,5,5));
+		gornjiL.add(ad);
+		gornjiL.add(re);
+		gornjiL.add(up);
+		gornjiL.add(ser);
+		JPanel gornjiD=new JPanel(new FlowLayout(FlowLayout.RIGHT,90,5));
+		gornjiD.add(dePo,BorderLayout.EAST);
+		JPanel gornji=new JPanel();
+		//gornji.add(p12,BorderLayout.WEST);
+		gornji.add(gornjiL);
+		gornji.add(gornjiD);
+	
+	
+		dugTab.setLayout(new BoxLayout(dugTab, BoxLayout.Y_AXIS));
+		dugTab.add(gornji);
+		dugTab.setBackground(Color.BLACK);
+		
+		
+		JButton ad2=new JButton(MyApp.getInstance().getResourceBundle().getString("add"));
+		JButton re2=new JButton(MyApp.getInstance().getResourceBundle().getString("remove"));
+		JButton up2=new JButton(MyApp.getInstance().getResourceBundle().getString("update"));
+		JButton ser2=new JButton(MyApp.getInstance().getResourceBundle().getString("search"));
+		JButton dePo2=new JButton(MyApp.getInstance().getResourceBundle().getString("promote")); //demote ili promote 
+		dePo2.setPreferredSize(new Dimension(70,30));
+		ad2.setPreferredSize(new Dimension(70, 30));
+		re2.setPreferredSize(new Dimension(70, 30));
+		up2.setPreferredSize(new Dimension(70, 30));
+		ser2.setPreferredSize(new Dimension(70, 30));
+		
+		JPanel gornjiL2=new JPanel();
+		gornjiL2.setLayout((LayoutManager) new FlowLayout(FlowLayout.RIGHT,5,5));
+		gornjiL2.add(ad2);
+		gornjiL2.add(re2);
+		gornjiL2.add(up2);
+		gornjiL2.add(ser2);
+		JPanel gornjiD2=new JPanel(new FlowLayout(FlowLayout.RIGHT,90,5));
+		gornjiD2.add(dePo2,BorderLayout.EAST);
+		JPanel gornji2=new JPanel();
+		//gornji.add(p12,BorderLayout.WEST);
+		gornji2.add(gornjiL2);
+		gornji2.add(gornjiD2);
+	
+
+		getDugTab2().setLayout(new BoxLayout(getDugTab2(), BoxLayout.Y_AXIS));
+		getDugTab2().add(gornji2);
+		getDugTab2().setBackground(Color.BLACK);
+		
+		
+		for(TableModel t:listaTabela) {
+			if(t.getTabela().getTitle().equals(ime)) {
+				tabela=t.getTabela();
+			}
+			
+		}
+		Row row=new Row();
+		String[] columnNames = row.uzmiHeadere(tabela);
+		//for(String ss: columnNames) {
+		//	System.out.println(ss);
+		//}
+		 JTable table = new JTable(data, columnNames);
+		 table.setName(tabela.getTitle());//dodao ivan
+		 table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		 re.addActionListener(new ActionListener() {
+				
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					// TODO Auto-generated method stub
+					//ako je selektovanired 0 ne moze obrisati iskace joptionpane
+					if(table.getSelectedRow()==-1) {
+					
+						JOptionPane.showMessageDialog(null, MyApp.getInstance().getResourceBundle().getString("redSelekt"), MyApp.getInstance().getResourceBundle().getString("error"), 1);
+					}else {
+						 int n = JOptionPane.showConfirmDialog(
+						            null,
+						            MyApp.getInstance().getResourceBundle().getString("deleteRow"),
+						            MyApp.getInstance().getResourceBundle().getString("confirmation"),
+						            JOptionPane.YES_NO_OPTION);
+
+						 if(n == JOptionPane.YES_OPTION){
+							 CRUDFactory aa=new RemoveData(table,table.getSelectedRow(),tabela,w,h,listaTabela,false,new Tabela(),false,false);
+						 }
+						
+				    }
+				}
+			});
+		 
+		 up.addActionListener(new ActionListener() {
+				
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					// TODO Auto-generated method stub
+					//ako je selektovanired 0 ne moze obrisati iskace joptionpane
+					if(table.getSelectedRow()==-1) {
+					
+						JOptionPane.showMessageDialog(null, MyApp.getInstance().getResourceBundle().getString("redSelekt"), "Error", 1);
+					}else {
+						UpdateView aa = new UpdateView(table,table.getSelectedRow(),tabela,w,h,listaTabela,false,new Tabela(),false);
+					}
+				}
+			});
+		 
+		
+		 
+		 
+		 up2.addActionListener(new ActionListener() {
+				
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					// TODO Auto-generated method stub
+					//ako je selektovanired 0 ne moze obrisati iskace joptionpane
+					Tabela trazena=new Tabela();
+					//ako je selektovanired 0 ne moze obrisati iskace joptionpane
+					int selektovani=tab.getSelectedIndex(); //naziv taba je ovo +1
+					if(taboviRedom.containsKey(selektovani)) {
+						trazena=taboviRedom.get(selektovani);
+					}
+					JTable ta=new JTable();
+					JPanel pa=new JPanel();
+					JScrollPane paj=new JScrollPane();
+					JViewport vw=new JViewport();
+					
+					if(taboviRedom.containsKey(selektovani)) {
+						pa=(JPanel) tab.getComponentAt(tab.getSelectedIndex());
+						paj=(JScrollPane) pa.getComponent(0);
+						vw=(JViewport) paj.getComponent(0);
+						ta=(JTable) vw.getComponent(0);
+					}
+				
+					if(ta.getSelectedRow()==-1) {
+						
+						JOptionPane.showMessageDialog(null, MyApp.getInstance().getResourceBundle().getString("redSelekt"), "Error", 1);
+					}else {
+						UpdateView aa = new UpdateView(ta,ta.getSelectedRow(),trazena,w,h,listaTabela,true,tabela,false);
+					}
+				}
+			});
+		 
+		 
+		 
+		 
+		 
+		 ad.addActionListener(new ActionListener() {
+				
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					// TODO Auto-generated method stub
+				
+
+					AddView aa = new AddView(tabela,table,false,new Tabela(),listaTabela,w,h,false,tabela.getTitle());
+
+					
+				}
+			});
+			
+		   ser.addActionListener(new ActionListener() {
+				
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					// TODO Auto-generated method stub
+					SearchData ss = new SearchData(data,columnNames,table.getName(),tabela,listaTabela,w,h,false,new Tabela(),table);
+				}
+			});
+	//	 table.setFillsViewportHeight(true);
+
+ if(getData2().size()!=0) {
+	// p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
+	// table.setPreferredScrollableViewportSize(new Dimension(w-10,h/2));
+	// table.setEnabled(false);
+	
+	 pane2.setViewportView(table);
+		pane2.revalidate();
+		pane2.repaint();
+     p.add(pane2,BorderLayout.CENTER);
+     dugTab.add(pane2);
+     dugTab.setBorder(BorderFactory.createLineBorder(Color.WHITE));
+     osnova.add(dugTab);
+
+     int brojac=0;
+     for(Tabela s:data2.keySet()) {
+    	 
+    	
+    	 try {
+    		 setDugTab2(getData2().get(s),s,brojac,w,h);
+			 getDugTab2().setBorder(BorderFactory.createLineBorder(Color.WHITE));
+		     osnova.add(getDugTab2());
+    	 } catch (Exception e) {
+ 			// TODO: handle exception
+ 		}
+    	 
+    	 brojac++;
+     }
+
+     re2.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				// TODO Auto-generated method stub
+				Tabela trazena=new Tabela();
+				//ako je selektovanired 0 ne moze obrisati iskace joptionpane
+				int selektovani=tab.getSelectedIndex(); //naziv taba je ovo +1
+				if(taboviRedom.containsKey(selektovani)) {
+					trazena=taboviRedom.get(selektovani);
+				}
+				JTable ta=new JTable();
+				JPanel pa=new JPanel();
+				JScrollPane paj=new JScrollPane();
+				JViewport vw=new JViewport();
+				
+				if(taboviRedom.containsKey(selektovani)) {
+					pa=(JPanel) tab.getComponentAt(tab.getSelectedIndex());
+					paj=(JScrollPane) pa.getComponent(0);
+					vw=(JViewport) paj.getComponent(0);
+					ta=(JTable) vw.getComponent(0);
+				}
+			
+				if(ta.getSelectedRow()==-1) {
+					
+					JOptionPane.showMessageDialog(null, MyApp.getInstance().getResourceBundle().getString("redSelekt"), MyApp.getInstance().getResourceBundle().getString("error"), 1);
+				}else {
+					int n = JOptionPane.showConfirmDialog(
+				            null,
+				            MyApp.getInstance().getResourceBundle().getString("deleteRow"),
+				            MyApp.getInstance().getResourceBundle().getString("confirmation"),
+				            JOptionPane.YES_NO_OPTION);
+
+				 if(n == JOptionPane.YES_OPTION){
+				CRUDFactory aa=new RemoveData(ta,ta.getSelectedRow(),trazena,w,h,listaTabela,true,tabela,false,false);
+				 }
+				 }
+			}
+		});
+		 
+		 ad2.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				Tabela trazena=new Tabela();
+				int selektovani=tab.getSelectedIndex(); //naziv taba je ovo +1
+				if(taboviRedom.containsKey(selektovani)) {
+					trazena=taboviRedom.get(selektovani);
+				}
+				JTable ta=new JTable();
+				JPanel pa=new JPanel();
+				JScrollPane paj=new JScrollPane();
+				JViewport vw=new JViewport();
+				if(taboviRedom.containsKey(selektovani)) {
+					pa=(JPanel) tab.getComponentAt(tab.getSelectedIndex());
+					paj=(JScrollPane) pa.getComponent(0);
+					vw=(JViewport) paj.getComponent(0);
+					ta=(JTable) vw.getComponent(0);
+				}
+			
+
+				AddView aa = new AddView(trazena,ta,true,tabela,listaTabela,w,h,false,trazena.getTitle());
+
+				
+			}
+		});
+		   ser2.addActionListener(new ActionListener() {
+			   
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				Tabela trazena=new Tabela();
+				int selektovani=tab.getSelectedIndex(); //naziv taba je ovo +1
+				if(taboviRedom.containsKey(selektovani)) {
+					trazena=taboviRedom.get(selektovani);
+				}
+				JTable ta=new JTable();
+				JPanel pa=new JPanel();
+				JScrollPane paj=new JScrollPane();
+				JViewport vw=new JViewport();
+				if(taboviRedom.containsKey(selektovani)) {
+					pa=(JPanel) tab.getComponentAt(tab.getSelectedIndex());
+					paj=(JScrollPane) pa.getComponent(0);
+					vw=(JViewport) paj.getComponent(0);
+					ta=(JTable) vw.getComponent(0);
+				}
+				
+			
+				// TODO Auto-generated method stub
+				String[] columnDete = row.uzmiHeadere(trazena);
+				Object[][] podaci=row.konekcijaSaBazom(trazena);
+				SearchData ss = new SearchData(podaci,columnDete,trazena.getTitle(),trazena,listaTabela,w,h,true,tabela,ta);   				
+			}
+		});
+		   table.getSelectionModel().addListSelectionListener(new ListSelectionListener(){
+			     public void valueChanged(ListSelectionEvent event) {
+			         //System.out.println(table.getValueAt(table.getSelectedRow(), 0).toString());
+			    		tab=new JTabbedPane();
+			    		taboviRedom=new HashMap<>();
+			    	System.out.println("ACTION LIST"); //2 puta se poziva
+			    	 Predfiltracija pf=new Predfiltracija();
+			    	 //osnova.removeAll();
+			    	 //osnova.add(dugTab);
+			    	 setData2( pf.filtriraj(listaTabela,ime, table, w, h));
+			    	 int brojac=0;
+			    	 getDugTab2().removeAll();
+			    	 getDugTab2().add(gornji2);
+			    	 for(Tabela s:getData2().keySet()) {
+			    		 System.out.println(s.getTitle()); //2 puta se poziva
+			    		 setDugTab2(getData2().get(s),s,brojac,w,h);
+			    		 brojac++;
+			    		 
+			    	 }
+			    	 osnova.add(getDugTab2());
+			    		osnova.repaint();
+				    	osnova.revalidate();
+			     }
+			 });
+
+	 }
+	else {
+			 //table.setEnabled(false);
+	//	pane1.add(table);
+		pane1.setViewportView(table);
+		pane1.revalidate();
+		pane1.repaint();
+		// p.add(table);
+		     p.add(pane1);
+		   
+		     
+		     dugTab.add(pane1);
+		    
+		     dugTab.setBorder(BorderFactory.createLineBorder(Color.WHITE));
+		     osnova.add(dugTab);
+
+		     
+}
+
+		
+dePo.addActionListener(new ActionListener() { //mora pitati ako ima vise roditelja u kog ce!!!!!!!!!!!!!!!!!!!!!
+	
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		// TODO Auto-generated method stub
+		Tabela trazena=new Tabela();
+		for(TableModel t:listaTabela) {
+			if(t.getTabela().getTitle().equals(ime)) {
+				trazena=t.getTabela();
+			}
+		}
+		
+		Tabela roditelj=new Tabela();
+		ArrayList<String> roditelji=trazena.getParent();
+		if(roditelji.size()==0) {
+			JOptionPane.showMessageDialog(null, MyApp.getInstance().getResourceBundle().getString("noParentT"), MyApp.getInstance().getResourceBundle().getString("error"), 1);
+		}else if(roditelji.size()>1) {
+			//////////////////////////////////////////////////////////////////////////////////////////////////////////
+			JFrame validationFrame = new JFrame(MyApp.getInstance().getResourceBundle().getString("parents"));
+			validationFrame.setLayout(new FlowLayout());
+			validationFrame.setResizable(true);
+			JRadioButton birdButton;
+			ButtonGroup group = new ButtonGroup();
+			
+
+			for(String s:roditelji) {
+				birdButton = new JRadioButton(s);
+				birdButton.setSelected(false);
+				validationFrame.add(birdButton);
+	
+				birdButton.addActionListener(new ActionListener() {
+					
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						// TODO Auto-generated method stub
+						for(TableModel t:listaTabela) {
+							if(t.getTabela().getTitle().equals(s)) { // ovaj mu je roditelj
+								//System.out.println("/////////////"+t.getTitle());
+								ArrayList<Tabela> decica3=new ArrayList<>();
+								for(TableModel ta:listaTabela) {
+									if(ta.getTabela().getParent().size()!=0) {
+										for(String roda:ta.getTabela().getParent()) {
+											if(roda.equals(t.getTabela().getTitle())) {
+												System.out.println(roda);
+												decica3.add(ta.getTabela());
+											}
+										}
+									}
+								}
+							
+								Row rw=new Row(); 
+								Object[][] data=rw.konekcijaSaBazom(t.getTabela());
+								HashMap<Tabela, Object[][]> data2=rw.konekcijaSaBazomDeca(decica3);
+								TableView is=new TableView(listaTabela,t.getTabela().getTitle());
+								JPanel pa=is.iscrtavanje(w,h,data,data2);
+								MyApp.getInstance().addToCentralPanel2(pa);
+
+								
+								
+							}
+						}
+						validationFrame.dispose();
+						
+					}
+				});
+				
+				group.add(birdButton);
+			}
+			
+			//validationFrame.add(iza,BorderLayout.SOUTH);
+		     validationFrame.setSize(500, 80);
+		     validationFrame.setLocationRelativeTo(null);
+		     validationFrame.setVisible(true);
+		}else{
+			String rod="";
+			for(String s:trazena.getParent()) {
+				rod=s;
+			}
+			for(TableModel t:listaTabela) {
+				if(t.getTabela().getTitle().equals(rod)) {
+					roditelj=t.getTabela();
+				}
+			}
+			ArrayList<Tabela> decica2=new ArrayList<>();
+			for(TableModel t:listaTabela) {
+				if(t.getTabela().getParent().size()!=0) {
+					for(String roda:t.getTabela().getParent()) {
+						if(roda.equals(roditelj.getTitle())) {
+							decica2.add(t.getTabela());
+						}
+					}
+				}
+			}
+			Row rw=new Row(); 
+			Object[][] data=rw.konekcijaSaBazom(roditelj);
+			HashMap<Tabela, Object[][]> data2=rw.konekcijaSaBazomDeca(decica2);
+			TableView is=new TableView(listaTabela,roditelj.getTitle());
+			JPanel pa=is.iscrtavanje(w,h,data,data2);
+			MyApp.getInstance().addToCentralPanel2(pa);
+
+			
+		}
+		
+	}
+});
+ 
+dePo2.addActionListener(new ActionListener() { //promote
+	
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		// TODO Auto-generated method stub
+		Tabela trazena=new Tabela();
+		int selektovani=tab.getSelectedIndex(); //naziv taba je ovo +1
+		if(taboviRedom.containsKey(selektovani)) {
+			trazena=taboviRedom.get(selektovani);
+		}
+		ArrayList<Tabela> decica=new ArrayList<>();
+		//System.out.println(trazena.getTitle());
+		for(TableModel t:listaTabela) {
+			if(t.getTabela().getParent().size()!=0) {
+				for(String rod:t.getTabela().getParent()) {
+					if(rod.equals(trazena.getTitle())) {
+						decica.add(t.getTabela());
+					}
+				}
+			}
+		}
+		Row rw=new Row(); 
+		Object[][] data=rw.konekcijaSaBazom(trazena);
+		HashMap<Tabela, Object[][]> data2=rw.konekcijaSaBazomDeca(decica);
+		TableView is=new TableView(listaTabela,trazena.getTitle());
+		//System.out.println((mainFrame.getWidth()-levi.getWidth())+" "+(mainFrame.getHeight()));
+		JPanel pa=is.iscrtavanje(w,h,data,data2);
+		MyApp.getInstance().addToCentralPanel2(pa);
+	}
+});
+	
+
+
+ 
+ 
+		return osnova;
+		
+		
+	}
+
+
+	public HashMap<Tabela,Object[][]> getData2() {
+		return data2;
+	}
+
+	public void setData2(HashMap<Tabela,Object[][]> data2) {
+		this.data2 = data2;
+	}
+
+	public JPanel getDugTab2() {
+		return dugTab2;
+	}
+
+	public void setDugTab2(Object[][] podaci,Tabela s,int brojac,int w,int h) {
+		//FALE DUGMICI 
+		Row row=new Row();
+	
+   	 	String[] columnDete = row.uzmiHeadere(s);
+		 JTable tableDete = new JTable(podaci, columnDete);
+		 tableDete.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		 tableDete.setName(s.getTitle());//dodao ivan
+
+		    		 tableDete.setFillsViewportHeight(true);
+		    		
+		 	//pane1.setViewportView(tableDete);
+			//pane1.revalidate();
+			//pane1.repaint();
+		// tableDete.setEnabled(false);
+		 JPanel pp=new JPanel();
+	     pp.setBackground(Color.BLACK);
+	     pp.setPreferredSize(new Dimension(w-10,h/2));
+		 //pp.add(pane1);
+	     pp.add(new JScrollPane(tableDete));
+		 //pp.add(pane1);
+		 int c=brojac+1;
+		 tab.add("Tab "+c,pp);
+		 Integer rbr=new Integer(brojac);
+		 tab.setBackground(Color.BLACK);
+		 taboviRedom.put(rbr, s);
+		 getDugTab2().add(tab);
+		
+		this.dugTab2 = getDugTab2();
+	}
+}

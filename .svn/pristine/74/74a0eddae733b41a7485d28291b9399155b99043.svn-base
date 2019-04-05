@@ -1,0 +1,135 @@
+package view;
+
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.util.ArrayList;
+import java.util.Enumeration;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JTree;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
+
+import controller.TreeManipulation;
+import model.Paket;
+import model.PaketModel;
+import model.Tabela;
+import model.TableModel;
+
+public class TreeAndTable extends JFrame{
+	private TreeManipulation tm;
+	private Paket paketM;
+	private static TreeAndTable instance;
+	private JTree tree;
+	private DefaultMutableTreeNode sm;
+	private static ArrayList<Paket> p = new ArrayList<>();
+	
+	public static TreeAndTable getInstance(){
+		if(instance==null){
+			instance=new TreeAndTable();
+		
+		}return instance;
+	}
+	
+
+	
+	public void init(ArrayList<Paket> a,ArrayList<Tabela> t) {
+	
+		
+		JFrame mainFrame = new JFrame("NLI");
+		JPanel levi = new JPanel();
+		JPanel desni = new JPanel();
+		JPanel center = new JPanel(new BorderLayout());	
+		paketM=new Paket();
+		sm = new DefaultMutableTreeNode();	
+		tree = new JTree(popuniStablo(paketM, a, t));
+		levi.add(getTree());
+		center.add(levi,BorderLayout.WEST);
+		center.add(desni,BorderLayout.EAST);
+		mainFrame.setPreferredSize(new Dimension(800,800));
+		mainFrame.setSize(800, 800);
+		mainFrame.setLocationRelativeTo(null);
+		mainFrame.add(center);
+		mainFrame.setVisible(true);
+	}
+	
+public DefaultMutableTreeNode popuniStablo(Paket w,ArrayList<Paket>a,ArrayList<Tabela> t){
+	
+	DefaultMutableTreeNode koren = new DefaultMutableTreeNode("Root");
+	koren.removeAllChildren();
+	for(int i = 0 ; i < a.size(); i++){
+		if(a.get(i).getRoditelji()=="") {
+		System.out.println(a.get(i).getImePaketa());
+		DefaultMutableTreeNode roditelj = new DefaultMutableTreeNode(a.get(i).getImePaketa()+" [Package]");
+	
+		koren.add(roditelj);
+		}
+		
+	}
+	
+	for(int i = 0 ; i < t.size(); i++){
+		System.out.println(t.get(i).getTitle());
+		if(t.get(i).getParent().isEmpty() && t.get(i).getPaket().equals("")) {
+		DefaultMutableTreeNode roditelj = new DefaultMutableTreeNode(t.get(i).getTitle()+" [Table]");
+	
+		koren.add(roditelj);
+		}
+		
+	}
+	
+		
+		int flag=-2;
+	/*
+		for(int i=0;i<a.size();i++) {
+			if(a.get(i).getRoditelji()!="") {
+				flag++;
+			
+			
+				 while(true){
+					
+					 Enumeration children = koren.children();
+					 if(children.hasMoreElements()) {
+					 DefaultMutableTreeNode node = (DefaultMutableTreeNode) children.nextElement();
+	                    if(node.toString().equals(a.get(i).getRoditelji()+" [Package]")){
+
+	                        DefaultMutableTreeNode paket = new DefaultMutableTreeNode(a.get(i).getImePaketa()+" [Package]");
+	                     
+
+	                        node.add(paket);
+	                        
+	           //            model.nodesWereInserted(node, new int[]{node.getChildCount()-1,node.getChildCount()-2});
+	          //             model.reload();
+	                       flag=-1;
+	                        break;
+	                        
+	                    }
+					 }
+	              /*      else if(!children.hasMoreElements()) {
+	                    	root =(DefaultMutableTreeNode) koren.getChildAt(++flag);
+	                    }
+	                    
+	                }
+			}
+		}
+		*/
+	
+	
+		return koren;
+	}
+
+
+
+	public JTree getTree() {
+		return tree;
+	}
+
+
+
+	public void setTree(JTree tree) {
+		this.tree = tree;
+	}
+	
+
+}

@@ -1,0 +1,26 @@
+package app;
+
+import javax.swing.UIManager;
+
+import view.ChooseSource;
+public class Main {
+
+
+	public static void main(String[] args) {
+		
+		try {
+			UIManager.setLookAndFeel("com.jtattoo.plaf.noire.NoireLookAndFeel");
+			//MyApp IV = MyApp.getInstance();
+			//IV.setVisible(true);
+		//	ChooseSource cs=new ChooseSource();
+
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		} 
+		
+		ChangeLanguage cl = new ChangeLanguage();
+		
+	}
+
+}

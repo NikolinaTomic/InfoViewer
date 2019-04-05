@@ -1,0 +1,26 @@
+package model;
+
+public class Strani_kljuc {
+	private String sharingTable;
+	private String sourceAttribute;
+	private String destinationAttribute;
+	public String getSourceAttribute() {
+		return sourceAttribute;
+	}
+	public void setSourceAttribute(String sourceAttribute) {
+		this.sourceAttribute = sourceAttribute;
+	}
+	public String getDestinationAttribute() {
+		return destinationAttribute;
+	}
+	public void setDestinationAttribute(String destinationAttribute) {
+		this.destinationAttribute = destinationAttribute;
+	}
+	public String getSharingTable() {
+		return sharingTable;
+	}
+	public void setSharingTable(String sharingTable) {
+		this.sharingTable = sharingTable;
+	}
+
+}

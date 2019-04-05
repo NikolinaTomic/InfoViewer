@@ -1,0 +1,9 @@
+package controller;
+
+import model.Tabela;
+
+public interface Parser {
+	
+	public Tabela[] parse(String sema);
+
+}

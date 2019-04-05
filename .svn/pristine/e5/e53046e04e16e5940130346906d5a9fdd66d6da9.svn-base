@@ -1,0 +1,221 @@
+package app;
+
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.WindowConstants;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+public class MyApp extends JFrame {
+	
+	private static MyApp instance;
+	private MyToolBar toolbar;
+	private JPanel centar;
+    private	JButton sacuvaj;
+    private	JButton exit;
+
+    
+	private JTextArea content = new JTextArea();
+	public static MyApp getInstance() {
+    	if (instance == null) {
+			instance = new MyApp();
+			instance.initialise();
+		}
+		return instance;
+	}
+	
+	public String addToCentralPanel(JTextArea jta) {
+		
+		centar.removeAll();
+		centar.add(jta);
+		centar.revalidate();
+		centar.repaint();
+		return jta.getText();
+	}
+	
+	private void initialise() {
+		Toolkit toolkit = Toolkit.getDefaultToolkit();
+		Dimension screenSize = toolkit.getScreenSize();
+		int screenHeight = screenSize.height;
+		int screenWidth = screenSize.width;
+		setSize(screenWidth / 2, screenHeight / 2);
+		setTitle("InfoViewer");
+		setResizable(true);
+		setIconImage(toolkit.getImage("resources/icon.png"));
+		
+		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+		this.addWindowListener(new java.awt.event.WindowAdapter() {
+		    @Override
+		    public void windowClosing(java.awt.event.WindowEvent e) {
+		      
+		    	if(!MyApp.getInstance().getContent().getText().isEmpty()) {
+					JDialog dialog = new JDialog();
+					JOptionPane pane = new JOptionPane();
+				dialog.setContentPane(pane);
+				dialog.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+					int a=	pane.showConfirmDialog(dialog, "Would You Like to Save your work?","Warning",JOptionPane.YES_NO_OPTION);
+					if(JOptionPane.YES_OPTION==a) {
+						JFileChooser fc = new JFileChooser();
+						fc.showSaveDialog(null);
+				try {
+						String putanja = fc.getSelectedFile().getAbsolutePath();
+						String toJason = MyApp.getInstance().getContent().getText();
+						System.out.println(toJason);
+						PrintWriter pw;
+					
+						
+							pw = new PrintWriter(putanja+".json");
+							pw.print(toJason);
+							pw.flush();
+							pw.close();
+						//	MyApp.getInstance().addToCentralPanel(new JTextArea());
+							MyApp.getInstance().getSacuvaj().setVisible(false);
+							MyApp.getInstance().getContent().setEditable(false);
+						} catch (FileNotFoundException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}catch (NullPointerException e2) {
+							// TODO: handle exception
+						}
+					
+				       }
+
+					else if(a==JOptionPane.NO_OPTION) {
+						System.exit(0);
+					}	
+		    	}
+		    }
+		});
+		setLocationRelativeTo(null);
+		
+		
+	
+		toolbar = new MyToolBar();
+		
+		JPanel toolbarPanel = new JPanel(new BorderLayout());
+		toolbarPanel.add(toolbar,BorderLayout.WEST);
+		this.add(toolbarPanel,BorderLayout.NORTH);
+		
+     	getContent().setEditable(false);
+		
+		JPanel southPanel = new JPanel();
+		 setSacuvaj(new JButton("Save"));
+		 setExit(new JButton("Back"));
+		
+		 getSacuvaj().setVisible(false);
+		 getExit().setVisible(false);
+		 
+		 getExit().addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				// TODO Auto-generated method stub
+				getContent().setText("");
+				MyApp.getInstance().addToCentralPanel(new JTextArea());
+				MyApp.getInstance().getSacuvaj().setVisible(false);
+				MyApp.getInstance().getExit().setVisible(false);
+				MyApp.getInstance().getContent().setEditable(false);
+			}});
+		getSacuvaj().addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				
+			      try {
+			    		String toJason = MyApp.getInstance().getContent().getText();
+			    	  new JSONObject(toJason);
+			    	 
+			    	  JFileChooser fc = new JFileChooser();
+						fc.showSaveDialog(null);
+			    	  String putanja = fc.getSelectedFile().getAbsolutePath();
+			
+				PrintWriter pw;
+			   
+				
+					pw = new PrintWriter(putanja+".json");
+					pw.print(toJason);
+					pw.flush();
+					pw.close();
+					getContent().setText("");
+					MyApp.getInstance().addToCentralPanel(new JTextArea());
+					MyApp.getInstance().getSacuvaj().setVisible(false);
+					MyApp.getInstance().getExit().setVisible(false);
+					MyApp.getInstance().getContent().setEditable(false);
+				} catch (FileNotFoundException e1) {
+					// TODO Auto-generated catch block
+					System.out.println("puklo");
+				}  catch (JSONException e2) {
+					JOptionPane.showMessageDialog(null, "Greske u meta-shemi!\n"+e2.getMessage(), "Error", 1);
+					// TODO: handle exception
+				}  catch (NullPointerException e2) {
+					// TODO: handle exception
+				}
+			
+			       
+			       
+			}
+		});
+		
+	    southPanel.add(getSacuvaj());	
+	    southPanel.add(getExit());
+	   // southPanel.add(exit);
+
+		this.add(southPanel,BorderLayout.SOUTH);
+		
+		
+		centar = new JPanel(new BorderLayout());
+		JScrollPane p = new JScrollPane(content);
+
+		this.add(p,BorderLayout.CENTER);
+				
+
+	}
+	
+	public JPanel getCentar() {
+		return centar;
+	}
+
+	public void setCentar(JPanel centar) {
+		this.centar = centar;
+	}
+
+	public JButton getSacuvaj() {
+		return sacuvaj;
+	}
+
+	public void setSacuvaj(JButton sacuvaj) {
+		this.sacuvaj = sacuvaj;
+	}
+
+	public JButton getExit() {
+		return exit;
+	}
+
+	public void setExit(JButton exit) {
+		this.exit = exit;
+	}
+
+	public JTextArea getContent() {
+		return content;
+	}
+
+	public void setContent(JTextArea content) {
+		this.content = content;
+	}
+
+}

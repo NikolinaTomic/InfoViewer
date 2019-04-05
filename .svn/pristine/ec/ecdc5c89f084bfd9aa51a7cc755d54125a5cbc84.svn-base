@@ -1,0 +1,200 @@
+
+[
+
+  
+{
+ 
+	"title": "Drzava",
+        "paket":"p2",
+        "parent": [],
+ 
+ 	"attributes": [
+ 
+     {
+
+      	"name": "Oznaka",
+        "code": "DRZ_ID",
+        "type": "string",
+        "maxString": 3,
+        "is_mandatory":true
+      },
+{
+
+      	"name": "Naziv",
+        "code": "DRZ_NAZIV", 
+        "type": "string",
+        "maxString": 128,
+        "is_mandatory":true
+      },
+
+      {
+
+      	"name": "Glavni grad",
+        "code": "NM_PB",
+        "type": "string",
+        "maxString": 5,  
+       "is_mandatory":false
+
+      }
+ 
+   ],
+
+  	"key": ["DRZ_ID"],
+  	"relations": [
+  	    {
+     "relation_title": "Pripada drzavi",
+      "sourceKey": ["DRZ_ID"],
+      "destinationTable": "Naseljeno mesto",
+      "destinationKey": ["DRZ_ID"]
+    }
+]
+},
+
+{
+
+  "title": "Naseljeno mesto",
+    "paket":"",
+  "parent": ["Drzava"],
+ 
+
+  "attributes": [
+    {
+      "code": "DRZ_ID",
+      "name": "Drzava",
+      "maxString": 3,
+      "is_mandatory": true,
+      "type": "string"
+    },
+    {
+      "code": "NM_PB", 
+      "name": "Post. broj",
+      "maxString": 5,
+      "is_mandatory": true,
+      "type": "string"
+    },
+    {
+      "code": "NM_NAZIV",
+      "name": "Naziv",
+      "maxString": 128,
+      "is_mandatory": true,
+      "type": "string"
+    },
+    {
+      "code": "NM_STAN",
+      "name": "Broj stanovnika",
+      "maxString": 10,
+      "is_mandatory": false,
+      "type": "number"
+    },
+    {
+      "code": "NM_GRAD",
+      "name": "Grad",
+      "is_mandatory": true,
+      "type": "boolean"
+    }
+  ],
+
+
+
+  "relations": [
+  	        {
+          "relation_title": "Mesto stanovanja",
+            "sourceKey": ["NM_PB","DRZ_ID"],
+            "destinationTable": "Student",
+            "destinationKey": ["STU_MESTOSTAN","STU_DRZSTAN"]
+       },
+
+        {
+          "relation_title": "Mesto rodjenja",
+            "sourceKey": ["NM_PB","DRZ_ID"],
+            "destinationTable": "Student",
+            "destinationKey": ["STU_MESTORODJ","STU_DRZRODJ"]
+       },
+    {
+     "relation_title": "Glavni grad",
+      "sourceKey": ["NM_PB","DRZ_ID"],
+      "destinationTable": "Drzava",
+      "destinationKey": ["NM_PB","DRZ_ID"]
+    },
+
+  ],
+  "key": [
+    "DRZ_ID",
+    "NM_PB"
+  ]
+},{
+  "title": "Student",
+        "paket":"",
+        "parent": [],
+        
+  "attributes": [
+
+       {
+            "name": "Indeks",
+            "code": "STU_INDEKS",
+            "type": "string",
+            "maxString": 15,
+            "is_mandatory":true
+  },
+ 
+       {
+            "name": "Ime",
+            "code": "STU_IME",
+            "type": "string",
+            "maxString": 64,
+            "is_mandatory":true
+  },
+ 
+       {
+            "name": "Prezime",
+            "code": "STU_PREZIME",
+            "type": "string",
+            "maxString": 64,
+            "is_mandatory":true
+  },
+ 
+       {
+            "name": "Drzava rodjenja",
+            "code": "STU_DRZRODJ",
+            "type": "string",
+            "maxString": 3,
+            "is_mandatory":true
+  },
+ 
+       {
+            "name": "Mesto rodjenja",
+            "code": "STU_MESTORODJ",
+            "type": "string",
+            "maxString": 5,
+            "is_mandatory":true
+  },
+ 
+       {
+            "name": "Drzava stan.",
+            "code": "STU_DRZSTAN",
+            "type": "string",
+            "maxString": 3,
+            "is_mandatory":false
+  },
+ 
+       {
+            "name": "Mesto stan.",
+            "code": "STU_MESTOSTAN",
+            "type": "string",
+            "maxString": 5,
+            "is_mandatory":false
+  }
+
+],
+   "key": [ "STU_INDEKS"],
+    "relations": [
+
+  ]
+  
+  
+},
+  [{"imePaketa":"p1","roditelji":""},{"imePaketa":"p2","roditelji":""},{"imePaketa":"p3","roditelji":"p1"},
+  	{"imePaketa":"p4","roditelji":"p1"},{"imePaketa":"p5","roditelji":"p3"},{"imePaketa":"p6","roditelji":"p5"}]
+
+
+  ]

@@ -1,0 +1,79 @@
+package tree;
+
+import javax.swing.tree.DefaultMutableTreeNode;
+
+import app.MyApp;
+import model.PaketModel;
+import model.TableModel;
+
+public class DrawTree {
+	  
+	   public void iscrtajStablo(DefaultMutableTreeNode cvor,Object trenutn) {
+
+		  if(trenutn instanceof PaketModel) {
+			  PaketModel trenutni=(PaketModel) trenutn;
+			  
+		   if(trenutni.getDeca().size()!=0) {
+			   for(Object pm:trenutni.getDeca()) {
+				   if(pm instanceof PaketModel) {
+					   PaketModel pmm=(PaketModel)pm;
+					   DefaultMutableTreeNode node=new DefaultMutableTreeNode(pmm);
+					   cvor.add(node);
+					   iscrtajStablo(node, pmm);
+				   }
+				   else if(pm instanceof TableModel){
+					   TableModel pmm=(TableModel)pm;
+					   DefaultMutableTreeNode node=null;
+					   DefaultMutableTreeNode nodee=null;
+
+					   
+					   if(pmm.getTabela().getTitle().equals("Drzava"))
+					   {   
+					   TableModel object = new TableModel(pmm.getTabela(),pmm.getDeca());
+					   object.getTabela().setTitle(MyApp.getInstance().getResourceBundle().getString("drzava"));
+					   node=new DefaultMutableTreeNode(object);
+					   }else if(pmm.getTabela().getTitle().equals("Naseljeno mesto"))
+					   {
+						  
+					   }
+					   else					   
+					   node=new DefaultMutableTreeNode(pmm);
+					   
+					   //ew DefaultMutableTreeNode(pmm);
+					   cvor.add(node);
+					   iscrtajStablo(node, pmm);
+				   }
+			   }
+		   }
+		  }else {
+			  TableModel trenutni=(TableModel) trenutn;
+			 	  
+			
+			   if(trenutni.getDeca().size()!=0) {
+				   
+				   DefaultMutableTreeNode node = null;
+				   
+				   for(TableModel tm:trenutni.getDeca()) {
+					   
+					   /*  if(tm.getTabela().getTitle().equals("Drzava"))
+					   {   
+					   TableModel object = new TableModel(tm.getTabela(),tm.getDeca());
+					   object.getTabela().setTitle(MyApp.getInstance().getResourceBundle().getString("drzava"));
+					   node=new DefaultMutableTreeNode(object);
+					   }/*else if(tm.getTabela().getTitle().equals("Naseljeno mesto"))
+					   {
+						  
+					   }
+					   else		*/			   
+					   node=new DefaultMutableTreeNode(tm);
+					   
+					   cvor.add(node);
+					   iscrtajStablo(node, tm);
+				   }
+			   }
+		  }
+	   }
+	   
+
+
+}

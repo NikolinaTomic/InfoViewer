@@ -1,0 +1,199 @@
+package controller;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import model.Tabela;
+
+public class Row {
+	 
+	
+	public Object[][] konekcijaSaBazom(Tabela t) {
+		try {
+				//otvaranje konekcije
+			
+				Connection conn = DriverManager.getConnection("jdbc:jtds:sqlserver://147.91.175.155/psw-2018-tim2-4","psw-2018-tim2-4","tim2-413090834");
+				String izmena=t.getTitle();
+				if(t.getTitle().contains(" ")) {
+					String str = " ";
+					izmena=izmena.replace(str, "_");
+				}
+				String sql = "select * from "+izmena;
+				
+				PreparedStatement pstmt = conn.prepareStatement(sql);
+				
+				//pstmt.setString(1, "SRB");
+				
+				//izvrsavanje upita
+				
+				ResultSet rset = pstmt.executeQuery();
+				
+				int brojac=0;
+				while(rset.next()) {
+					brojac++;
+				}
+				rset = pstmt.executeQuery();
+				//System.out.println(brojac);
+				//provera da li ima podataka u resultset-u
+				if(!rset.isBeforeFirst()) {
+					System.out.println("Nema podataka");
+				}
+				
+				int brPar=t.getAttributes().size();
+				Object[][] data=new Object[brojac][brPar];
+	
+				int brojac2=0;
+				while(rset.next()) {
+					for(int i=0;i<brPar;i++) {
+						data[brojac2][i]=rset.getString(i+1);
+					}
+					brojac2++;
+				}
+				
+				rset.close();
+				pstmt.close();
+				return data;
+				
+			} catch (Exception e) {
+				e.printStackTrace();
+				return null;
+			}
+		
+	}	//otvaranje konekcije
+	
+	public HashMap<Tabela, Object[][]> konekcijaSaBazomDeca(ArrayList<Tabela> deca){
+		try {
+			Connection conn = DriverManager.getConnection("jdbc:jtds:sqlserver://147.91.175.155/psw-2018-tim2-4","psw-2018-tim2-4","tim2-413090834");
+			HashMap<Tabela, Object[][]> podaci=new HashMap<>();
+		if(deca.size()!=0) {
+		for(Tabela t: deca) {
+			//System.out.println(t.getTitle());
+			String izmena=t.getTitle();
+			if(t.getTitle().contains(" ")) {
+				String str = " ";
+				izmena=izmena.replace(str, "_");
+			}
+			String sql = "select * from "+izmena;
+			//System.out.println(izmena);
+			PreparedStatement pstmt = conn.prepareStatement(sql);
+			
+			ResultSet rset = pstmt.executeQuery();
+			
+			int brojac=0;
+			while(rset.next()) {
+				brojac++;
+			}
+			rset = pstmt.executeQuery();
+			//System.out.println(brojac);
+			//provera da li ima podataka u resultset-u
+			if(!rset.isBeforeFirst()) {
+				System.out.println("Nema podataka");
+			}
+			
+			int brPar=t.getAttributes().size();
+			Object[][] data=new Object[brojac][brPar];
+
+			int brojac2=0;
+			while(rset.next()) {
+				for(int i=0;i<brPar;i++) {
+					data[brojac2][i]=rset.getString(i+1);
+				}
+				
+				brojac2++;
+			}
+			podaci.put(t, data);
+			rset.close();
+			pstmt.close();
+			
+			
+		
+		
+		}
+		}////PROVERI IMA LI DECE
+		return podaci;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+	public HashMap<Tabela, Object[][]> konekcijaSaBazomDecaProbrano(HashMap<Tabela,HashMap<Integer,String>> obelezja){
+		//mapa dece sa kljucem naziv tabele deteta i 2. hashmapa je pozicija sa vrednoscu na tom kljucu
+		try {
+			Connection conn = DriverManager.getConnection("jdbc:jtds:sqlserver://147.91.175.155/psw-2018-tim2-4","psw-2018-tim2-4","tim2-413090834");
+			HashMap<Tabela, Object[][]> podaci=new HashMap<>();
+		if(obelezja.size()!=0) {
+		for(Tabela t: obelezja.keySet()) {
+			//System.out.println(t.getTitle());
+			String izmena=t.getTitle();
+			if(t.getTitle().contains(" ")) {
+				String str = " ";
+				izmena=izmena.replace(str, "_");
+			}
+			String sql = "select * from "+izmena;
+			//System.out.println(izmena);
+			PreparedStatement pstmt = conn.prepareStatement(sql);
+			
+			ResultSet rset = pstmt.executeQuery();
+			
+			int brojac=0;
+			while(rset.next()) {
+				brojac++;
+			}
+			rset = pstmt.executeQuery();
+			//System.out.println(brojac);
+			//provera da li ima podataka u resultset-u
+			if(!rset.isBeforeFirst()) {
+				System.out.println("Nema podataka");
+			}
+		HashMap<Integer, String> brVr=obelezja.get(t);
+			int brPar=t.getAttributes().size();
+			Object[][] data=new Object[brojac][brPar];
+			ArrayList<Boolean> daLiUbaciti=new ArrayList<>();
+			while(rset.next()) {
+				for(int i=0;i<t.getAttributes().size();i++) {
+					if(brVr.containsKey(i)) { //ako je bas taj i sporedni kljuc
+						if(rset.getString(i+1).equals(brVr.get(i))) {
+							daLiUbaciti.add(true);
+							
+						}else {
+							daLiUbaciti.add(false);
+						}					
+				}	
+			}
+			}
+			//for(Boolean b: daLiUbaciti) {
+			//	System.out.println(b);
+			//}
+			rset = pstmt.executeQuery();
+			int brojac2=0;
+			int redovi=0;
+			while(rset.next()) {
+				if(daLiUbaciti.get(redovi)==true) {
+					for(int i=0;i<t.getAttributes().size();i++) {		
+						data[brojac2][i]=rset.getString(i+1);	///GRESKA
+						
+					}brojac2++;
+				}redovi++;
+			}
+			
+			
+			podaci.put(t, data);
+			rset.close();
+			pstmt.close();
+
+		
+		}////PROVERI IMA LI DECE
+		}
+		return podaci;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+		
+}

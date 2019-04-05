@@ -1,0 +1,40 @@
+package controller;
+
+import java.awt.Image;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+
+import javax.swing.AbstractAction;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
+import javax.swing.JTextArea;
+import javax.swing.KeyStroke;
+
+import app.MyApp;
+
+public class Create_Shema extends AbstractAction {
+
+	public Create_Shema() {
+Icon icon = new ImageIcon(new ImageIcon("resources/create.jpg").getImage().getScaledInstance(35, 35, Image.SCALE_SMOOTH));
+		
+		putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK));
+		putValue(MNEMONIC_KEY, KeyEvent.VK_S);
+		putValue(SMALL_ICON, icon);
+		putValue(NAME, MyApp.getInstance().getResourceBundle().getString("createShema"));
+		putValue(SHORT_DESCRIPTION, MyApp.getInstance().getResourceBundle().getString("createShema"));
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent arg0) {
+		// TODO Auto-generated method stub
+	     MyApp.getInstance().getArej().setEditable(true);
+		 MyApp.getInstance().getArej().setText("");
+		 MyApp.getInstance().addToCentralPanel(new JTextArea());
+		 MyApp.getInstance().getSacuvaj().setVisible(true);
+		 MyApp.getInstance().getExit().setVisible(true);
+		 MyApp.getInstance().getVal().setVisible(true);
+		 MyApp.getInstance().getPar().setVisible(true);
+	}
+
+	
+}

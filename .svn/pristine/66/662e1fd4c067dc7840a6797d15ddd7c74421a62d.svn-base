@@ -1,0 +1,282 @@
+package controller;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import org.json.JSONObject;
+
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import model.Paket;
+import model.ParentChild;
+import model.ParentChildPaket;
+import model.Tabela;
+
+public class JSON_Parser implements Parser{
+
+	private HashMap<String,ParentChild> mapa;
+	private HashMap<String,ParentChildPaket> mapaPaket;
+
+	@Override
+	public ArrayList<Object> parse(String sema, String semaPaket) {
+		ArrayList<Object> vrati = new ArrayList();
+		
+		if(sema.equals("")) return vrati;
+		
+		if(semaPaket.equals("")) return vrati;
+		
+		System.out.println(sema);
+		
+		/*sema=sema.replaceAll("\\s","");
+		
+		System.out.println(sema);
+		*/
+		String[] parts = sema.split("\"");
+		
+		int num=0;
+		
+		for(int i=0; i<parts.length;i++)
+		{
+			if(parts[i].equals("attributes")) num++;
+		}
+		
+		//System.out.println(num);
+					
+		ObjectMapper objectMapper = new ObjectMapper();
+		objectMapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
+		objectMapper.configure(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT, true);
+		objectMapper.configure(DeserializationFeature.ACCEPT_EMPTY_ARRAY_AS_NULL_OBJECT, true);
+		Tabela[] tabela=null;
+		
+		try {
+			tabela = objectMapper.readValue(sema, Tabela[].class);
+		} catch (JsonParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JsonMappingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		for(Tabela t : tabela)
+		{
+			System.out.println(t);
+			
+			if(mapa.get(t.getTitle()) != null)
+			{
+				if(mapa.get(t.getTitle()).getParent()!=null || !(mapa.get(t.getTitle()).getParent().equals("")))
+				{
+					//izbaci iz mape
+					//nadji parenta dodaj u mapu dodaj decu
+					
+					for(Tabela s: tabela)
+					{
+						if(s.getTitle().equals(t.getParent()))
+						{
+							mapa.put(s.getTitle(),new ParentChild(s,null));
+							mapa.get(s.getTitle()).getDeca().add(mapa.get(t.getTitle()));
+						}
+					}
+					
+					mapa.remove(t.getTitle());
+					
+					
+				}
+			}else
+			{
+				if(t.getParent()==null || t.getParent().equals(""))
+				{
+					mapa.put(t.getTitle(),new ParentChild(t,null));
+				}
+				else
+				{
+					if(mapa.get(t.getParent()) != null)
+					mapa.get(t.getParent()).getDeca().add(new ParentChild(t, null));
+					else
+					{
+						for(Tabela s: tabela)
+						{
+							if(s.getTitle().equals(t.getParent()))
+							{
+								mapa.put(s.getTitle(),new ParentChild(s,null));
+								mapa.get(s.getTitle()).getDeca().add(new ParentChild(t, null));
+							}
+						}
+					}
+						
+						
+				}
+			}	
+		}
+		
+		Paket[] car=null;
+		
+		try {
+			car = objectMapper.readValue(semaPaket, Paket[].class);
+		} catch (JsonParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JsonMappingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		for(Paket t : car)
+		{
+			System.out.println(t);
+			
+			if(mapaPaket.get(t.getImePaketa()) != null)
+			{
+				if(mapaPaket.get(t.getImePaketa()).getRoditelji()!=null || !(mapaPaket.get(t.getImePaketa()).getRoditelji().equals("")))
+				{
+					//izbaci iz mape
+					//nadji parenta dodaj u mapu dodaj decu
+					
+					for(Paket s: car)
+					{
+						if(s.getImePaketa().equals(t.getRoditelji()))
+						{
+							mapaPaket.put(s.getImePaketa(),new ParentChildPaket(s,null));
+							mapaPaket.get(s.getImePaketa()).getDeca().add(mapaPaket.get(t.getImePaketa()));
+						}
+					}
+					
+					mapaPaket.remove(t.getImePaketa());
+					
+					
+				}
+			}else
+			{
+				if(t.getRoditelji()==null || t.getRoditelji().equals(""))
+				{
+					mapaPaket.put(t.getImePaketa(),new ParentChildPaket(t,null));
+				}
+				else
+				{
+					if(mapaPaket.get(t.getRoditelji()) != null)
+						mapaPaket.get(t.getRoditelji()).getDeca().add(new ParentChildPaket(t, null));
+					else
+					{
+						for(Paket s: car)
+						{
+							if(s.getImePaketa().equals(t.getRoditelji()))
+							{
+								mapaPaket.put(s.getImePaketa(),new ParentChildPaket(s,null));
+								mapaPaket.get(s.getImePaketa()).getDeca().add(new ParentChildPaket(t, null));
+							}
+						}
+					}
+						
+						
+				}
+			}	
+		}
+		
+		for(ParentChild p : mapa.values())
+		{
+			vrati.add(p);
+		}
+		
+		for(ParentChildPaket p : mapaPaket.values())
+		{
+			vrati.add(p);
+		}
+		
+		return vrati;
+		
+		
+	}
+
+	public Paket[] parsePaketi(String semaPaket) {
+		
+		Paket[] vrati = {};
+		
+		if(semaPaket.equals("")) return vrati;
+		
+		ObjectMapper objectMapper = new ObjectMapper();
+		objectMapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
+		objectMapper.configure(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT, true);
+		objectMapper.configure(DeserializationFeature.ACCEPT_EMPTY_ARRAY_AS_NULL_OBJECT, true);
+		Paket[] car=null;
+		
+		try {
+			car = objectMapper.readValue(semaPaket, Paket[].class);
+		} catch (JsonParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JsonMappingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		for(Paket t : car)
+		{
+			System.out.println(t);
+			
+			if(mapaPaket.get(t.getImePaketa()) != null)
+			{
+				if(mapaPaket.get(t.getImePaketa()).getRoditelji()!=null || !(mapaPaket.get(t.getImePaketa()).getRoditelji().equals("")))
+				{
+					//izbaci iz mape
+					//nadji parenta dodaj u mapu dodaj decu
+					
+					for(Paket s: car)
+					{
+						if(s.getImePaketa().equals(t.getRoditelji()))
+						{
+							mapaPaket.put(s.getImePaketa(),new ParentChildPaket(s,null));
+							mapaPaket.get(s.getImePaketa()).getDeca().add(mapaPaket.get(t.getImePaketa()));
+						}
+					}
+					
+					mapaPaket.remove(t.getImePaketa());
+					
+					
+				}
+			}else
+			{
+				if(t.getRoditelji()==null || t.getRoditelji().equals(""))
+				{
+					mapaPaket.put(t.getImePaketa(),new ParentChildPaket(t,null));
+				}
+				else
+				{
+					if(mapaPaket.get(t.getRoditelji()) != null)
+						mapaPaket.get(t.getRoditelji()).getDeca().add(new ParentChildPaket(t, null));
+					else
+					{
+						for(Paket s: car)
+						{
+							if(s.getImePaketa().equals(t.getRoditelji()))
+							{
+								mapaPaket.put(s.getImePaketa(),new ParentChildPaket(s,null));
+								mapaPaket.get(s.getImePaketa()).getDeca().add(new ParentChildPaket(t, null));
+							}
+						}
+					}
+						
+						
+				}
+			}	
+		}
+		
+		
+		return car;
+	}
+		
+	
+	
+}

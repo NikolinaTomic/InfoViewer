@@ -1,0 +1,36 @@
+package view;
+
+import java.util.ArrayList;
+
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+
+import model.Tabela;
+
+public class IscrtajTabelu {
+	private ArrayList<Tabela> listaTabela=new ArrayList<>();
+	private Tabela tabela=new Tabela();
+	private String ime="";
+	
+	public IscrtajTabelu(ArrayList<Tabela> tabela,String ime) {
+		this.listaTabela=tabela;
+		this.ime=ime;
+	}
+	
+	public JPanel iscrtavanje() {
+		JPanel p=new JPanel();
+		
+		for(Tabela t:listaTabela) {
+			if(t.getTitle().equals(ime)) {}
+			tabela=t;
+		}
+		
+		
+		
+		//JLabel l=new JLabel("ASKDJJJSKJSJDKF");
+		//p.add(l);
+		return p;
+		
+		
+	}
+}

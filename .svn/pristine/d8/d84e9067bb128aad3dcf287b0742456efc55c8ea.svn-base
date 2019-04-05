@@ -1,0 +1,127 @@
+root = Root
+
+daliCuvati = Would You Like to Save your work?
+
+warning = Warning!
+
+greskaShema = Errors in schema!\n
+
+createShema = "Create Shema"
+
+error = Error
+
+notEmpty = Shema cannot be empty!\n
+
+validation = Validation
+
+parse = Parse
+
+choseMetaShema = Choose meta-shema
+
+browse = Browse
+
+success = Success!\n
+
+duplicate = Cannot insert duplicate key!\n
+
+from = From:
+
+to = To:
+
+true = True
+
+false = False
+
+duplicatePaket = Duplicate of a package name! Unsuccessful validation!
+
+duplicateParent = Parent name is the same name as a name of a package! Unsuccessful validation!
+
+parentExist = Parent doesn't exist as a package! Unsuccessful validation!
+
+paketParent = Packages can not be parents to eachother! Unsuccessful validation!
+
+paketDete = Package parent can not be its child! Unsuccessful validation!
+
+duplicateTable = Duplicate of a table name! Unsuccessful validation!
+
+tablePP = Table can not have both parent and package! Unsuccessful validation!
+
+keyExist = Key from shema doesn't exist as an attribute! Unsuccessful validation!
+
+sourceKey = SourceKey from shema doesn't exist as an attribute! Unsuccessful validation!
+
+parentExist = Parent from table doesn't exist! Unsuccessful validation!
+
+paketExist = Package name from one of the tables doesn't exist! Unsuccessful validation!
+
+destinationExist = Destination table from shema doesn't exist as a table! Unsuccessful validation!
+
+destinationKey = Destination key from shema doesn't exist as an attribute in a specific table! Unsuccessful validation!
+
+parentTT = Parent from shema doesn't exist as a table title! Unsuccessful validation!
+
+parentTable = Parent name is the same name as a title of table! Unsuccessful validation!
+
+successfulValid = Successful validation!
+
+unsuccessfulValid = Unsuccessful validation!\n
+
+loadShemu = Load_Shemu
+
+greskeOpet = Errors in Shema!\n Continue loading?
+
+parseShema = Parse shema
+
+cancel = Cancel
+
+chooseMS = Choose meta-shema
+
+chooseS = Choose shema
+
+greskaMS = Error in meta-shema!\n
+
+msEmpty = Meta-Shema or shema cannot be empty
+
+date = Date
+
+num = Number
+
+str = String
+
+numeric = Numeric
+
+bool = Boolean
+
+redSelekt = There is no selected row
+
+validateShema = Validate shema
+
+addData = Add data
+
+allMandatory = All mandatory fields must not be empty!\n
+
+chooseD = Choose dialog
+
+jsonF = JSON file
+
+db= Data base
+
+add=Add
+
+remove = Remove
+
+update = Update
+
+search = Search
+
+promote = Promote
+
+demote = Demote
+
+deleteRow = Delete this row?
+
+confirmation=Confirmation
+
+noParentT = Table doesn't have a parent. It can not be demoted!
+
+parents = Parents

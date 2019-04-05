@@ -1,0 +1,239 @@
+package view;
+
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+
+import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+
+import app.MyApp;
+import controller.AddData;
+import controller.CRUDFactory;
+import model.Tabela;
+import model.TableModel;
+
+public class AddView{
+	public Tabela t;
+	public LinkedHashMap<String, Object> glavno = new LinkedHashMap<>();
+	public ArrayList<JTextField> polja = new ArrayList<>();
+	public ArrayList<ButtonGroup> dugmad = new ArrayList<>();
+	public ArrayList<JRadioButton> but = new ArrayList<>();
+	public JRadioButton istina = new JRadioButton(MyApp.getInstance().getResourceBundle().getString("true"));
+	public JRadioButton laz = new JRadioButton(MyApp.getInstance().getResourceBundle().getString("false"));
+	public ButtonGroup grupa = new ButtonGroup();
+	public JTable table;
+	public boolean dete;
+	public Tabela roditelj;
+	public ArrayList<TableModel> listaTabela;
+	public int w;
+	public int h;
+	public boolean search;
+	public AddView(Tabela t,JTable table,boolean dete,Tabela roditelj,ArrayList<TableModel> listaTabela,int w,int h,boolean search) {
+		this.t=t;
+		this.table = table;
+		this.dete=dete;
+		this.roditelj=roditelj;
+		this.listaTabela=listaTabela;
+		this.w=w;
+		this.h=h;
+		this.search=search;
+		addDataPanel();
+	}
+	
+	public void addDataPanel() {
+		// TODO Auto-generated method stub
+		JPanel main = new JPanel();
+		main.setSize(800, 600);
+		istina.setName("istina");
+		laz.setName("laz");
+		main.setLayout(new BoxLayout(main, BoxLayout.Y_AXIS));
+		JFrame validationFrame=new JFrame(MyApp.getInstance().getResourceBundle().getString("addData"));
+		for(int i=0;i<t.getAttributes().size();i++) {
+			JPanel panel = new JPanel();
+			panel.setLayout(new FlowLayout());
+			
+			
+			Toolkit toolkit = Toolkit.getDefaultToolkit();
+			panel.setName(t.getAttributes().get(i).getName());
+			JLabel l=new JLabel(t.getAttributes().get(i).getName()+":" +" ");
+			String a = t.getAttributes().get(i).getName()+"*  :" +" ";
+			String tip = t.getAttributes().get(i).getType();
+			String ime = t.getAttributes().get(i).getName() + ":";
+			int duzina = t.getAttributes().get(i).getMaxString();
+			
+			if(t.getAttributes().get(i).isIs_mandatory()) {
+				l.setText(a);
+			    l.setName(a);
+			}
+			else
+			l.setText(ime);
+			
+			JTextField jta = new JTextField();
+			if(t.getAttributes().get(i).isIs_mandatory()) {
+				jta.setToolTipText("mandatory");
+			}
+			else
+			    jta.setToolTipText("no");
+			
+			 if(tip.equals("number")) {
+				
+				
+			jta.addKeyListener(new KeyAdapter() {
+			    public void keyTyped(KeyEvent e) {
+			      char c = e.getKeyChar();
+			      if (!((c >= '0') && (c <= '9') ||
+			         (c == KeyEvent.VK_BACK_SPACE) ||
+			         (c == KeyEvent.VK_DELETE)) || (jta.getText().length()>(duzina-1)))
+			                                       
+			      {
+			       toolkit.beep();
+			        e.consume();
+			      }
+			    }
+			  });
+			 }
+	
+				
+				
+			 if(tip.equals("string")) {
+					
+				
+			jta.addKeyListener(new KeyAdapter() {
+			    public void keyTyped(KeyEvent e) {
+			      char c = e.getKeyChar();
+			     if (jta.getText().length()>(duzina-1))		                                       
+			      {
+			       toolkit.beep();
+			        e.consume();
+			      }
+			    }
+			  });
+			 }
+			 
+			 
+			jta.setPreferredSize(new Dimension(250, 25));
+			
+	//	jta.setSize(5, 5);
+			
+			//jta.setPreferredSize(new Dimension(20, 30));
+		
+			jta.setName(t.getAttributes().get(i).getName());
+		
+			panel.add(l);
+			grupa.clearSelection();
+			
+	
+			
+			if(t.getAttributes().get(i).getType().equals("boolean")) {
+				 ButtonGroup bg = new ButtonGroup();
+				 ArrayList<JRadioButton> bg2 = new ArrayList<>();
+				 
+				 JRadioButton b1 = new JRadioButton("True");
+				 
+			     JRadioButton b2 = new JRadioButton("False");
+				if(t.getAttributes().get(i).isIs_mandatory()) {
+				 
+				 b1.setName(t.getAttributes().get(i).getName()+"[tm]");
+				 b2.setName(t.getAttributes().get(i).getName()+"[fm]");	 
+				}
+				else {
+					 b1.setName(t.getAttributes().get(i).getName()+"[tn]");
+					 b2.setName(t.getAttributes().get(i).getName()+"[fn]");	 
+						
+				}
+				 bg.add(b1);
+				 bg.add(b2);
+				 but.add(b1);
+				 but.add(b2);
+				 
+				    JPanel istinalaz = new JPanel();
+					
+					istinalaz.setLayout(new BoxLayout(istinalaz, BoxLayout.X_AXIS));
+					istinalaz.add(b1);
+					istinalaz.add(b2);
+					panel.add(istinalaz);
+					dugmad.add(bg);
+				 glavno.put(t.getAttributes().get(i).getCode(), bg);
+			 }
+			 else {
+					panel.add(jta);
+					jta.setSize(5, 5);
+					 polja.add(jta);
+					 glavno.put(t.getAttributes().get(i).getCode(),jta);
+			 }
+			
+			main.add(panel);
+			
+			
+		}
+		
+      
+		
+		JButton b=new JButton("Insert");
+		main.add(b);
+		b.addActionListener(new ActionListener() {
+			private ArrayList<JTextField> mandatory = new ArrayList<>();
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				// TODO Auto-generated method stub
+
+				
+				for(int i=0;i<polja.size();i++) {
+					if(polja.get(i).getToolTipText().equals("mandatory") ) {
+						mandatory.add(polja.get(i));
+					}
+				}
+				
+				int flag=0;
+				
+				for(int i=0;i<mandatory.size();i++) { 
+					if(mandatory.get(i).getText().equals("")) {
+						flag=1;
+						mandatory.get(i).setBackground(Color.RED);
+					}
+				}
+				
+				for(int i=0;i<dugmad.size();i++) {
+					if(dugmad.get(i).getSelection()==null) {
+						flag=1;
+						break;
+					}
+				}
+				if(flag==1) {
+					JOptionPane.showMessageDialog(null, MyApp.getInstance().getResourceBundle().getString("allMandatory"), MyApp.getInstance().getResourceBundle().getString("error"), 1);
+				}else {
+
+				CRUDFactory ad = new AddData(polja,dugmad,but,t,glavno,dete,roditelj,listaTabela,w,h,search,table);
+
+				validationFrame.dispose();
+				} 
+			}
+		});
+		
+		b.setPreferredSize(new Dimension(110,30));
+		validationFrame.setSize(900, 400);
+	 	validationFrame.add(main);
+	     validationFrame.setLocationRelativeTo(null);
+	     validationFrame.setVisible(true);
+		
+		
+	}
+
+
+}
